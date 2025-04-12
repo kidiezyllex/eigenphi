@@ -64,6 +64,7 @@
     "swiper": "^11.2.6",
     "tailwind-merge": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "yet-another-react-lightbox": "^3.21.9",
     "yup": "^1.6.1",

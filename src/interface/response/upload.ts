@@ -1,16 +1,53 @@
-import { IDocument } from "./document";
+export interface IFileData {
+  publicId: string;
+  url: string;
+  size?: number;
+  format?: string;
+  type?: string;
+}
 
-interface IFileInfo {
-  path: string;
-  publicUrl: string;
+export interface IUploadedFile {
+  _id: string;
+  title: string;
+  description?: string;
+  category: {
+    _id: string;
+    name: string;
+  };
+  project?: {
+    _id: string;
+    name: string;
+  };
+  task?: {
+    _id: string;
+    title: string;
+  };
+  creator: {
+    _id: string;
+    fullName: string;
+    avatar?: string;
+  };
+  filePath: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  version: string;
+  isShared: boolean;
+  sharedWith: string[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface IUploadResponse {
   success: boolean;
   message: string;
   data: {
-    document: IDocument;
-    file: IFileInfo;
+    document: IUploadedFile;
+    file: {
+      path: string;
+      publicUrl: string;
+    };
   };
 }
 
@@ -22,7 +59,7 @@ export interface IDeleteFileResponse {
 export interface IFileInfoResponse {
   success: boolean;
   data: {
-    document: IDocument;
+    document: IUploadedFile;
     downloadUrl: string;
   };
-} 
+}

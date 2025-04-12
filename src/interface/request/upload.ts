@@ -6,7 +6,11 @@ export interface IUploadFile {
   project?: string;
   task?: string;
   version?: string;
-  tags?: string[] | string;
+  tags?: string[];
   isShared?: boolean;
-  sharedWith?: string[] | string;
-} 
+  sharedWith?: string[];
+}
+
+export interface IFileInfo {
+  id: string;
+}
