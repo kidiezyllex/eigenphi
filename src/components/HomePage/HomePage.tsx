@@ -58,11 +58,12 @@ export const HomePage = () => {
                                                 <Link href="/career" className={`px-1 mx-2 font-semibold py-0 text-lg whitespace-nowrap cursor-pointer hover:underline ${pathname === '/career' ? 'text-[#F2A024]' : ''}`}>
                                                     <p>Tuyển dụng</p>
                                                 </Link>
-                                                <div>
+                                                <Link href="/auth" className="flex mt-5 items-center hover:bg-stone-200 cursor-pointer border rounded-xl px-5 py-2 w-fit">
                                                     <div className="flex mt-5 items-center hover:bg-stone-200 cursor-pointer border rounded-xl px-5 py-2 w-fit">
-                                                        <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" className="text-2xl mr-1" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M881 442.4H519.7v148.5h206.4c-8.9 48-35.9 88.6-76.6 115.8-34.4 23-78.3 36.6-129.9 36.6-99.9 0-184.4-67.5-214.6-158.2-7.6-23-12-47.6-12-72.9s4.4-49.9 12-72.9c30.3-90.6 114.8-158.1 214.7-158.1 56.3 0 106.8 19.4 146.6 57.4l110-110.1c-66.5-62-153.2-100-256.6-100-149.9 0-279.6 86-342.7 211.4-26 51.8-40.8 110.4-40.8 172.4S151 632.8 177 684.6C240.1 810 369.8 896 519.7 896c103.6 0 190.4-34.4 253.8-93 72.5-66.8 114.4-165.2 114.4-282.1 0-27.2-2.4-53.3-6.9-78.5z"></path></svg> Đăng nhập
+                                                        <Icon path={mdiGoogle} size={0.8} className="text-xl" />
+                                                        Đăng nhập
                                                     </div>
-                                                </div>
+                                                </Link>
                                             </nav>
                                         </motion.div>
                                     </div>
@@ -100,10 +101,11 @@ export const HomePage = () => {
                                             <Link href="/career" className={`px-1 mx-2 text-lg whitespace-nowrap cursor-pointer hover:underline ${pathname === '/career' ? 'text-[#F2A024]' : ''}`}>
                                                 Tuyển dụng
                                             </Link>
-                                            <Button variant="outline" className="flex items-center hover:underline cursor-pointer border rounded-xl px-2 py-1 ml-2 text-white !bg-transparent hover:text-white/80">
-                                                <Icon path={mdiGoogle} size={0.8} className="text-xl" />
-                                                Đăng nhập
-                                            </Button>
+                                            <Link href="/auth" >
+                                                <Button variant="outline" className="flex items-center hover:underline cursor-pointer border rounded-xl px-2 py-1 ml-2 text-white !bg-transparent hover:text-white/80">
+                                                    <Icon path={mdiGoogle} size={0.8} className="text-xl" />
+                                                    Đăng nhập
+                                                </Button></Link>
                                         </div>
                                     </div>
                                 </menu>
@@ -111,7 +113,7 @@ export const HomePage = () => {
                             <div className="w-1/2 sm:w-1/3">
                                 <Image
                                     alt="logo"
-                                    src="/images/Logo_wido.png"                                    
+                                    src="/images/Logo_wido.png"
                                     width={101}
                                     height={68}
                                     className="sm:hidden w-20"
@@ -857,12 +859,12 @@ export const HomePage = () => {
                         <div className="hidden sm:block">
                             <div style={{ transform: "translateX(-32px)" }} className="mt-12 flex justify-start">
                                 <div className="w-1/2 flex justify-center">
-                                    <Image 
-                                        alt="avatar" 
-                                        src="/images/avatar1.png" 
-                                        width={720} 
-                                        height={720} 
-                                        className="w-48 h-48 lg:w-64 lg:h-64" 
+                                    <Image
+                                        alt="avatar"
+                                        src="/images/avatar1.png"
+                                        width={720}
+                                        height={720}
+                                        className="w-48 h-48 lg:w-64 lg:h-64"
                                         quality={100}
                                         draggable={false}
                                     />
@@ -870,15 +872,15 @@ export const HomePage = () => {
                                 <div className="w-1/2 flex justify-start items-center">
                                     <div className="block">
                                         <h1 className="text-2xl font-extrabold sm:text-4xl lg:text-5xl mb-2 sm:mb-5 text-black">
-                                             <Image
-                                    quality={100}
-                                        alt="&quot;"
-                                        src="/images/comma.png"
-                                        width={35}
-                                        height={27}
-                                        className="w-4 sm:w-7 lg:w-9 inline mr-1"
-                                        style={{ transform: "translateY(-6px)" }}
-                                    /> <span>Peter Nguyen</span>
+                                            <Image
+                                                quality={100}
+                                                alt="&quot;"
+                                                src="/images/comma.png"
+                                                width={35}
+                                                height={27}
+                                                className="w-4 sm:w-7 lg:w-9 inline mr-1"
+                                                style={{ transform: "translateY(-6px)" }}
+                                            /> <span>Peter Nguyen</span>
                                         </h1>
                                         <h2 className="text-xs sm:text-lg lg:text-2xl font-bold text-black">CEO</h2>
                                         <p className="text-sm sm:text-base lg:text-lg mt-3">
@@ -889,12 +891,12 @@ export const HomePage = () => {
                             </div>
                             <div style={{ transform: "translateX(32px)" }} className="mt-12 flex justify-start flex-row-reverse">
                                 <div className="w-1/2 flex justify-center">
-                                    <Image 
-                                        alt="avatar" 
-                                        src="/images/avatar2.png" 
-                                        width={720} 
-                                        height={720} 
-                                        className="w-48 h-48 lg:w-64 lg:h-64" 
+                                    <Image
+                                        alt="avatar"
+                                        src="/images/avatar2.png"
+                                        width={720}
+                                        height={720}
+                                        className="w-48 h-48 lg:w-64 lg:h-64"
                                         quality={100}
                                         draggable={false}
                                     />
@@ -902,15 +904,15 @@ export const HomePage = () => {
                                 <div className="w-1/2 flex justify-start items-center">
                                     <div className="text-right block">
                                         <h1 className="text-2xl font-extrabold sm:text-4xl lg:text-5xl mb-2 sm:mb-5 text-black">
-                                             <Image
-                                    quality={100}
-                                        alt="&quot;"
-                                        src="/images/comma.png"
-                                        width={35}
-                                        height={27}
-                                        className="w-4 sm:w-7 lg:w-9 inline mr-1"
-                                        style={{ transform: "translateY(-6px)" }}
-                                    /> <span>Lana Phung</span>
+                                            <Image
+                                                quality={100}
+                                                alt="&quot;"
+                                                src="/images/comma.png"
+                                                width={35}
+                                                height={27}
+                                                className="w-4 sm:w-7 lg:w-9 inline mr-1"
+                                                style={{ transform: "translateY(-6px)" }}
+                                            /> <span>Lana Phung</span>
                                         </h1>
                                         <h2 className="text-xs sm:text-lg lg:text-2xl font-bold text-black">CMO</h2>
                                         <p className="text-sm sm:text-base lg:text-lg mt-3">
@@ -921,12 +923,12 @@ export const HomePage = () => {
                             </div>
                             <div style={{ transform: "translateX(-32px)" }} className="mt-12 flex justify-start">
                                 <div className="w-1/2 flex justify-center">
-                                    <Image 
-                                        alt="avatar" 
-                                        src="/images/avatar3.png" 
-                                        width={720} 
-                                        height={720} 
-                                        className="w-48 h-48 lg:w-64 lg:h-64" 
+                                    <Image
+                                        alt="avatar"
+                                        src="/images/avatar3.png"
+                                        width={720}
+                                        height={720}
+                                        className="w-48 h-48 lg:w-64 lg:h-64"
                                         quality={100}
                                         draggable={false}
                                     />
@@ -934,15 +936,15 @@ export const HomePage = () => {
                                 <div className="w-1/2 flex justify-start items-center">
                                     <div className="block">
                                         <h1 className="text-2xl font-extrabold sm:text-4xl lg:text-5xl mb-2 sm:mb-5 text-black">
-                                             <Image
-                                    quality={100}
-                                        alt="&quot;"
-                                        src="/images/comma.png"
-                                        width={35}
-                                        height={27}
-                                        className="w-4 sm:w-7 lg:w-9 inline mr-1"
-                                        style={{ transform: "translateY(-6px)" }}
-                                    /> <span>Daniel Nguyen</span>
+                                            <Image
+                                                quality={100}
+                                                alt="&quot;"
+                                                src="/images/comma.png"
+                                                width={35}
+                                                height={27}
+                                                className="w-4 sm:w-7 lg:w-9 inline mr-1"
+                                                style={{ transform: "translateY(-6px)" }}
+                                            /> <span>Daniel Nguyen</span>
                                         </h1>
                                         <h2 className="text-xs sm:text-lg lg:text-2xl font-bold text-black">CTO</h2>
                                         <p className="text-sm sm:text-base lg:text-lg mt-3">
