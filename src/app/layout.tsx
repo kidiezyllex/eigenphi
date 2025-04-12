@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import NextTopLoader from 'nextjs-toploader';
 import { ToastProvider } from '@/provider/ToastProvider';
 import { ReactQueryClientProvider } from '@/provider/ReactQueryClientProvider';
+import { UserProvider } from '@/context/useUserContext';
 import "flag-icons/css/flag-icons.min.css";
 import "@fortawesome/fontawesome-svg-core/styles.css"; 
 export const metadata: Metadata = {
@@ -24,18 +25,20 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body className="bg-background min-h-screen">
         <ReactQueryClientProvider>
-          <NextTopLoader
-            color="#2C8B3D"
-            initialPosition={0.08}
-            crawlSpeed={200}
-            height={3}
-            crawl={true}
-            easing="ease"
-            speed={200}
-            showSpinner={false}
-          />
-          <ToastProvider />
-          {children}
+          <UserProvider>
+            <NextTopLoader
+              color="#2C8B3D"
+              initialPosition={0.08}
+              crawlSpeed={200}
+              height={3}
+              crawl={true}
+              easing="ease"
+              speed={200}
+              showSpinner={false}
+            />
+            <ToastProvider />
+            {children}
+          </UserProvider>
         </ReactQueryClientProvider>
       </body>
     </html>
