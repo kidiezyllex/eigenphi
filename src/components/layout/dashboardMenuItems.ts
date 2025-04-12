@@ -9,6 +9,7 @@ import {
   mdiChartBar,
   mdiFileDocumentMultipleOutline,
   mdiClipboardListOutline,
+  mdiFolder,
 } from '@mdi/js';
 
 export const dashboardMenuItems: MenuItem[] = [
@@ -32,6 +33,11 @@ export const dashboardMenuItems: MenuItem[] = [
         id: 'document-shared',
         name: 'Tài liệu được chia sẻ',
         path: '/dashboard/documents/shared',
+      },
+      {
+        id: 'document-categories',
+        name: 'Danh mục tài liệu',
+        path: '/dashboard/document-categories',
       },
     ],
   },

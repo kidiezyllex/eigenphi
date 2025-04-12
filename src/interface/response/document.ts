@@ -3,7 +3,7 @@ interface ICategory {
   name: string;
 }
 
-interface ICreator {
+export interface ICreator {
   _id: string;
   fullName: string;
   avatar?: string;

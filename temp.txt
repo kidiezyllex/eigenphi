@@ -4,3 +4,47 @@
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+
+1. Các danh mục:
+[
+    {
+        "Tên danh mục": "Giới thiệu",
+        "Mô tả": "Mục tiêu của game và đối tượng người chơi."
+    },
+    {
+        "Tên danh mục": "Cốt truyện",
+        "Mô tả": "Tóm tắt cốt truyện, nhân vật chính và phụ, thế giới game."
+    },
+    {
+        "Tên danh mục": "Gameplay",
+        "Mô tả": "Cơ chế chơi, các loại nhiệm vụ, hệ thống điểm số và phần thưởng."
+    },
+    {
+        "Tên danh mục": "Thiết kế nhân vật",
+        "Mô tả": "Hình ảnh và mô tả nhân vật, kỹ năng và khả năng."
+    },
+    {
+        "Tên danh mục": "Môi trường",
+        "Mô tả": "Bản đồ và khu vực, đặc điểm môi trường."
+    },
+    {
+        "Tên danh mục": "Đồ họa và Âm thanh",
+        "Mô tả": "Phong cách nghệ thuật, nhạc nền và hiệu ứng âm thanh."
+    },
+    {
+        "Tên danh mục": "Lập trình và Công nghệ",
+        "Mô tả": "Công cụ phát triển, ngôn ngữ lập trình sử dụng."
+    },
+    {
+        "Tên danh mục": "Quản lý dự án",
+        "Mô tả": "Lịch trình phát triển, các mốc quan trọng."
+    },
+    {
+        "Tên danh mục": "Kiểm thử",
+        "Mô tả": "Phương pháp kiểm thử, ghi nhận lỗi và phản hồi."
+    },
+    {
+        "Tên danh mục": "Phát hành và Tiếp thị",
+        "Mô tả": "Kế hoạch phát hành, chiến lược tiếp thị."
+    }
+]

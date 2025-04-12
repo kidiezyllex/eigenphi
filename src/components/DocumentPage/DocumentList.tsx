@@ -18,6 +18,7 @@ import {
   mdiFileWordBox,
   mdiFileExcelBox,
   mdiFilePowerpointBox,
+  mdiEye,
 } from '@mdi/js';
 import { Input } from '@/components/ui/input';
 import {
@@ -42,29 +43,31 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import DocumentDeleteButton from './DocumentDeleteButton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DocumentListProps {
   type: 'personal' | 'project' | 'shared';
   projectId?: string;
+  onViewDocument?: (documentId: string) => void;
 }
 
-export default function DocumentList({ type, projectId }: DocumentListProps) {
+export default function DocumentList({ type, projectId, onViewDocument }: DocumentListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredDocuments, setFilteredDocuments] = useState<IDocument[]>([]);
   
   const params: any = {};
   if (type === 'personal') {
-    params.isPersonal = true;
+    params.project = undefined;
   } else if (type === 'project' && projectId) {
-    params.projectId = projectId;
+    params.project = projectId;
   } else if (type === 'shared') {
-    params.sharedWithMe = true;
+    params.project = "shared";
   }
   
   const { data: documentsData, isLoading: isLoadingDocuments, error: documentsError } = useGetDocuments(params);
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetDocumentCategories();
-  const deleteDocument = useDeleteDocument();
 
   useEffect(() => {
     if (!documentsData?.data) return;
@@ -134,24 +137,48 @@ export default function DocumentList({ type, projectId }: DocumentListProps) {
     toast.info('Chức năng chia sẻ đang được phát triển');
   };
 
-  // Xử lý xóa document
-  const handleDelete = async (docId: string) => {
-    try {
-      await deleteDocument.mutateAsync(docId);
-      toast.success('Đã xóa tài liệu thành công!');
-    } catch (error: any) {
-      toast.error('Không thể xóa tài liệu', {
-        description: error.message
-      });
+  // Xử lý xem chi tiết
+  const handleViewDocument = (docId: string) => {
+    if (onViewDocument) {
+      onViewDocument(docId);
+    } else {
+      // Nếu không có prop onViewDocument, điều hướng đến trang chi tiết
+      toast.info('Đang chuyển đến trang chi tiết...');
     }
   };
 
-  const handleUpload = () => {
-    toast.info('Chức năng tải lên tài liệu đang được phát triển');
-  };
-
   if (isLoadingDocuments || isLoadingCategories) {
-    return <div className="flex justify-center p-8">Đang tải dữ liệu...</div>;
+    return (
+      <div>
+        <div className="flex relative flex-1 max-w-md mb-4">
+          <Skeleton className="h-10 w-full" />
+        </div>
+        
+        <div className="flex gap-2 flex-wrap mb-6">
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-8 w-20" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Card key={index} className="overflow-hidden">
+              <div className="h-40 bg-muted/30 flex items-center justify-center">
+                <Skeleton className="h-20 w-20 rounded-full" />
+              </div>
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <div className="flex justify-between">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (documentsError) {
@@ -182,34 +209,6 @@ export default function DocumentList({ type, projectId }: DocumentListProps) {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb here */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/documents">Quản lý tài liệu</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage className="font-semibold !text-maintext">{titleMap[type]}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-[#2C8B3D]">{titleMap[type]}</h1>
-        <Button 
-          className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"
-          onClick={handleUpload}
-        >
-          <Icon path={mdiDownload} size={0.8} className="mr-2 rotate-180" />
-          Tải lên tài liệu
-        </Button>
-      </div>
-
       <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
         <div className="relative flex-1 max-w-md">
           <Icon 
@@ -250,244 +249,129 @@ export default function DocumentList({ type, projectId }: DocumentListProps) {
 
       {filteredDocuments.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-dashed">
-          <Icon path={mdiNoteRemove} size={3} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-500">Không có tài liệu nào</h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <Icon 
+            path={mdiNoteRemove} 
+            size={2} 
+            className="mx-auto text-gray-300 mb-4" 
+          />
+          <h3 className="text-lg font-medium text-muted-foreground">Không tìm thấy tài liệu nào</h3>
+          <p className="text-sm text-muted-foreground mt-1">
             {searchQuery 
-              ? 'Không tìm thấy tài liệu nào phù hợp với từ khóa tìm kiếm.'
-              : 'Hãy bắt đầu bằng cách tải lên tài liệu đầu tiên của bạn.'}
+              ? 'Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc của bạn' 
+              : 'Tạo tài liệu mới để bắt đầu'}
           </p>
         </div>
       ) : (
-        <Tabs defaultValue="grid" className="w-full">
-          <div className="flex justify-end mb-4">
-            <TabsList>
-              <TabsTrigger value="grid">
-                <Icon path="M8 24H24V8H8V24ZM0 16H6V10H0V16ZM0 24H6V18H0V24ZM0 8H6V2H0V8ZM8 8V2H24V8H8ZM10 10H22V22H10V10Z" size={0.7} />
-              </TabsTrigger>
-              <TabsTrigger value="list">
-                <Icon path="M3,4H21V8H3V4M3,10H21V14H3V10M3,16H21V20H3V16Z" size={0.7} />
-              </TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="grid" className="mt-2">
-            <motion.div 
-              className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              variants={container}
-              initial="hidden"
-              animate="show"
-            >
-              {filteredDocuments.map((document) => (
-                <motion.div key={document._id} variants={item}>
-                  <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center mb-2">
-                            <Icon 
-                              path={getFileIcon(document.filePath || '')} 
-                              size={1.2}
-                              className="text-blue-500 mr-3 shrink-0" 
-                            />
-                            <div className="min-w-0">
-                              <Link href={`/dashboard/documents/${document._id}`}>
-                                <h3 className="font-medium truncate hover:text-[#2C8B3D]">
-                                  {document.title}
-                                </h3>
-                              </Link>
-                            </div>
-                          </div>
-                          
-                          {document.description && (
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-2">
-                              {document.description}
-                            </p>
-                          )}
-                          
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {document.category && (
-                              <Badge variant="outline" className="text-xs">
-                                {document.category.name}
-                              </Badge>
-                            )}
-                            {document.tags?.map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <p className="text-xs text-gray-500">
-                              {formatDate(document.createdAt)}
-                            </p>
-                            <div className="flex space-x-1">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDownload(document.filePath || '', document.title);
-                                }}
-                              >
-                                <Icon path={mdiDownload} size={0.7} />
-                              </Button>
-                              
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleShare(document._id);
-                                }}
-                              >
-                                <Icon path={mdiShareVariant} size={0.7} />
-                              </Button>
-                              
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Icon path={mdiDotsVertical} size={0.7} />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/dashboard/documents/edit/${document._id}`}>
-                                      Chỉnh sửa
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem 
-                                    className="text-red-600"
-                                    onClick={() => handleDelete(document._id)}
-                                  >
-                                    Xóa
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-          </TabsContent>
-          
-          <TabsContent value="list" className="mt-2">
-            <div className="border rounded-md">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tên tài liệu
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Danh mục
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                      Ngày tạo
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Thao tác
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredDocuments.map((document) => (
-                    <tr key={document._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Icon 
-                            path={getFileIcon(document.filePath || '')} 
-                            size={1}
-                            className="text-blue-500 mr-3" 
-                          />
-                          <div>
-                            <Link href={`/dashboard/documents/${document._id}`}>
-                              <div className="text-sm font-medium text-gray-900 hover:text-[#2C8B3D]">
-                                {document.title}
-                              </div>
-                            </Link>
-                            <div className="text-sm text-gray-500 line-clamp-1 md:hidden">
-                              {document.category?.name || 'Không có danh mục'}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                        {document.category ? (
-                          <Badge variant="outline">
-                            {document.category.name}
-                          </Badge>
-                        ) : (
-                          <span className="text-gray-400 text-sm">-</span>
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          {filteredDocuments.map((document) => (
+            <motion.div key={document._id} variants={item}>
+              <Card className="overflow-hidden h-full flex flex-col transition-shadow hover:shadow-md">
+                <div 
+                  className="h-40 bg-muted/10 flex items-center justify-center cursor-pointer"
+                  onClick={() => handleViewDocument(document._id)}
+                >
+                  <Icon 
+                    path={getFileIcon(document.filePath)} 
+                    size={3} 
+                    className="text-primary opacity-70" 
+                  />
+                </div>
+                <CardContent className="p-4 flex-1 flex flex-col">
+                  <div className="mb-1 flex justify-between items-start">
+                    <h3 
+                      className="text-lg font-medium text-maintext mb-1 hover:text-primary cursor-pointer" 
+                      onClick={() => handleViewDocument(document._id)}
+                    >
+                      {document.title}
+                    </h3>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Icon path={mdiDotsVertical} size={0.8} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={() => handleViewDocument(document._id)}
+                          className="cursor-pointer"
+                        >
+                          <Icon path={mdiEye} size={0.7} className="mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDownload(document.filePath, document.title)}
+                          className="cursor-pointer"
+                        >
+                          <Icon path={mdiDownload} size={0.7} className="mr-2" />
+                          Tải xuống
+                        </DropdownMenuItem>
+                        {type !== 'shared' && (
+                          <DropdownMenuItem 
+                            onClick={() => handleShare(document._id)}
+                            className="cursor-pointer"
+                          >
+                            <Icon path={mdiShareVariant} size={0.7} className="mr-2" />
+                            Chia sẻ
+                          </DropdownMenuItem>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                        {formatDate(document.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(document.filePath || '', document.title);
-                            }}
-                          >
-                            <Icon path={mdiDownload} size={0.7} />
-                          </Button>
-                          
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShare(document._id);
-                            }}
-                          >
-                            <Icon path={mdiShareVariant} size={0.7} />
-                          </Button>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Icon path={mdiDotsVertical} size={0.7} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/documents/edit/${document._id}`}>
-                                  Chỉnh sửa
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-600"
-                                onClick={() => handleDelete(document._id)}
-                              >
-                                Xóa
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </TabsContent>
-        </Tabs>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground mb-2">
+                    {document.description 
+                      ? (document.description.length > 60 
+                          ? document.description.substring(0, 60) + '...' 
+                          : document.description)
+                      : 'Không có mô tả'}
+                  </div>
+                  
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {document.category && (
+                      <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">
+                        {document.category.name}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="mt-auto pt-3 flex justify-between items-center text-xs text-muted-foreground">
+                    <div>
+                      <span className="font-medium">{document.creator.fullName}</span>
+                      <br />
+                      <span>{formatDate(document.createdAt)}</span>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewDocument(document._id)}
+                        className="h-8"
+                      >
+                        <Icon path={mdiEye} size={0.7} className="mr-1" />
+                        Xem
+                      </Button>
+                      
+                      {type !== 'shared' && (
+                        <DocumentDeleteButton 
+                          documentId={document._id}
+                          documentTitle={document.title}
+                          size="sm"
+                          className="h-8"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
       )}
     </div>
   );

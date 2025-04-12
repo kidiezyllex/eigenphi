@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -175,155 +176,161 @@ export default function DocumentUploadButton({
           Tải lên tài liệu
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px]">
-        <DialogHeader>
-          <DialogTitle>Tải lên tài liệu mới</DialogTitle>
-          <DialogDescription>
-            Điền thông tin và tải lên tài liệu của bạn vào hệ thống.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Tiêu đề</Label>
-              <Input
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Nhập tiêu đề tài liệu"
-                required
-                disabled={uploadDocument.isPending}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="description">Mô tả</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Nhập mô tả tài liệu (tùy chọn)"
-                rows={3}
-                disabled={uploadDocument.isPending}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="category">Danh mục</Label>
-              <Select 
-                value={formData.categoryId} 
-                onValueChange={(value) => handleSelectChange('categoryId', value)}
-                disabled={uploadDocument.isPending || isLoadingCategories}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn danh mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoriesData?.data.map((category) => (
-                    <SelectItem key={category._id} value={category._id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label>Tập tin</Label>
-              <div
-                className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-                  dragActive ? 'border-[#2C8B3D] bg-[#2C8B3D]/5' : 'border-gray-300'
-                } ${formData.file ? 'bg-[#E9F3EB]' : ''}`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                {!formData.file ? (
-                  <div className="text-center">
-                    <Icon 
-                      path={mdiUpload} 
-                      size={1.5} 
-                      className="mx-auto text-gray-400 mb-2" 
-                    />
-                    <p className="text-sm font-medium mb-1">
-                      Kéo và thả tập tin vào đây hoặc nhấp để chọn
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Hỗ trợ các định dạng: DOC, DOCX, PDF, XLSX, PPTX, JPG, PNG
-                    </p>
-                    <Input
-                      id="file"
-                      type="file"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      disabled={uploadDocument.isPending}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => document.getElementById('file')?.click()}
-                      disabled={uploadDocument.isPending}
-                    >
-                      Chọn tập tin
-                    </Button>
-                  </div>
-                ) : (
-                  <motion.div 
-                    className="flex items-center justify-between bg-white p-3 rounded-md"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] p-0">
+        <ScrollArea className="max-h-[80vh]">
+          <div className="p-6">
+            <DialogHeader className="pb-4">
+              <DialogTitle>Tải lên tài liệu mới</DialogTitle>
+              <DialogDescription>
+                Điền thông tin và tải lên tài liệu của bạn vào hệ thống.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="title">Tiêu đề</Label>
+                  <Input
+                    id="title"
+                    className='bg-white focus:border-primary focus:ring-primary'
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Nhập tiêu đề tài liệu"
+                    required
+                    disabled={uploadDocument.isPending}
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Mô tả</Label>
+                  <Textarea
+                    id="description"
+                    className='bg-white focus:border-primary focus:ring-primary'
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Nhập mô tả tài liệu (tùy chọn)"
+                    rows={3}
+                    disabled={uploadDocument.isPending}
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="category">Danh mục</Label>
+                  <Select 
+                    value={formData.categoryId} 
+                    onValueChange={(value) => handleSelectChange('categoryId', value)}
+                    disabled={uploadDocument.isPending || isLoadingCategories}
                   >
-                    <div className="flex items-center">
-                      <Icon 
-                        path={mdiFileDocumentOutline} 
-                        size={1} 
-                        className="text-[#2C8B3D] mr-3" 
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">{formData.file.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn danh mục" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoriesData?.data.map((category) => (
+                        <SelectItem key={category._id} value={category._id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label>Tập tin</Label>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
+                      dragActive ? 'border-[#2C8B3D] bg-[#2C8B3D]/5' : 'border-gray-300'
+                    } ${formData.file ? 'bg-[#E9F3EB]' : ''}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    {!formData.file ? (
+                      <div className="text-center">
+                        <Icon 
+                          path={mdiUpload} 
+                          size={1.5} 
+                          className="mx-auto text-gray-400 mb-2" 
+                        />
+                        <p className="text-sm font-medium mb-1">
+                          Kéo và thả tập tin vào đây hoặc nhấp để chọn
                         </p>
+                        <p className="text-xs text-gray-500">
+                          Hỗ trợ các định dạng: DOC, DOCX, PDF, XLSX, PPTX, JPG, PNG
+                        </p>
+                        <Input
+                          id="file"
+                          type="file"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          disabled={uploadDocument.isPending}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => document.getElementById('file')?.click()}
+                          disabled={uploadDocument.isPending}
+                        >
+                          Chọn tập tin
+                        </Button>
                       </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={removeFile}
-                      className="h-8 w-8"
-                      disabled={uploadDocument.isPending}
-                    >
-                      <Icon path={mdiClose} size={0.7} className="text-gray-500" />
-                    </Button>
-                  </motion.div>
-                )}
+                    ) : (
+                      <motion.div 
+                        className="flex items-center justify-between bg-white p-3 rounded-md"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <div className="flex items-center">
+                          <Icon 
+                            path={mdiFileDocumentOutline} 
+                            size={1} 
+                            className="text-[#2C8B3D] mr-3" 
+                          />
+                          <div>
+                            <p className="font-medium text-gray-900">{formData.file.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={removeFile}
+                          className="h-8 w-8"
+                          disabled={uploadDocument.isPending}
+                        >
+                          <Icon path={mdiClose} size={0.7} className="text-gray-500" />
+                        </Button>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsOpen(false)}
+                  disabled={uploadDocument.isPending}
+                >
+                  Hủy
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"
+                  disabled={uploadDocument.isPending}
+                >
+                  {uploadDocument.isPending ? 'Đang xử lý...' : 'Tải lên'}
+                </Button>
+              </div>
+            </form>
           </div>
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setIsOpen(false)}
-              disabled={uploadDocument.isPending}
-            >
-              Hủy
-            </Button>
-            <Button 
-              type="submit" 
-              className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"
-              disabled={uploadDocument.isPending}
-            >
-              {uploadDocument.isPending ? 'Đang xử lý...' : 'Tải lên'}
-            </Button>
-          </DialogFooter>
-        </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

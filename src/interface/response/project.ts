@@ -1,11 +1,19 @@
 interface IUser {
   _id: string;
   fullName: string;
+  username?: string;
   avatar?: string;
   email?: string;
   employeeId?: string;
   position?: string;
   skills?: string[];
+  role?: string;
+  department?: string;
+  phone?: string;
+  address?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  bio?: string;
 }
 
 interface ITask {

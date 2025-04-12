@@ -1,8 +1,6 @@
 import {
   ISignIn,
   IRegister,
-  IUpdateUser,
-  IChangePassword,
 } from "@/interface/request/authentication";
 import {
   IAuthResponse,
