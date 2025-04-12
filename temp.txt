@@ -1,0 +1,6 @@
+ <Input
+            placeholder="Tìm kiếm tài liệu..."
+            className="pl-10 bg-white focus:border-primary focus:ring-primary"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />

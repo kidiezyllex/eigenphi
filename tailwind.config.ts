@@ -55,6 +55,7 @@ const config: Config = {
   			background: '#FDFDFD',
   			extra: '#F2A024',
   			active: '#F2A024',
+			maintext: '#374151',
   			'main-dark-blue': '#131921',
   			'main-charcoal-blue': '#232F3E',
   			'main-gunmetal-blue': '#252C35',

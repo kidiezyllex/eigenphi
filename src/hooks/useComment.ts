@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   createComment,
   getComments,
@@ -10,103 +9,117 @@ import {
   IUpdateComment,
   IGetCommentsParams
 } from '@/interface/request/comment';
-import { IComment } from '@/interface/response/comment';
+import {
+  ICommentResponse,
+  ICommentsListResponse,
+  IDeleteCommentResponse
+} from '@/interface/response/comment';
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-export const useComment = () => {
-  const [comments, setComments] = useState<IComment[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const useCreateComment = (): UseMutationResult<ICommentResponse, Error, ICreateComment> => {
+  const queryClient = useQueryClient();
 
-  // Lấy danh sách bình luận
-  const fetchComments = async (params?: IGetCommentsParams) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getComments(params);
-      setComments(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải bình luận');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Thêm bình luận mới
-  const addComment = async (commentData: ICreateComment) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await createComment(commentData);
-      // Thêm bình luận mới vào state
-      if (response.success) {
-        setComments(prevComments => [...prevComments, response.data]);
+  return useMutation<ICommentResponse, Error, ICreateComment>({
+    mutationFn: (commentData: ICreateComment) => createComment(commentData),
+    onSuccess: (_, variables) => {
+      // Invalidate queries based on the comment's target (forum post, task, document, etc.)
+      if (variables.forumPost) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { forumPost: variables.forumPost }],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['forumPost', variables.forumPost],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tạo bình luận');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Cập nhật bình luận
-  const editComment = async (id: string, commentData: IUpdateComment) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await updateComment(id, commentData);
-      // Cập nhật state comments
-      if (response.success) {
-        setComments(prevComments =>
-          prevComments.map(comment =>
-            comment._id === id ? response.data : comment
-          )
-        );
+      if (variables.task) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { task: variables.task }],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['task', variables.task],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể cập nhật bình luận');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Xóa bình luận
-  const removeComment = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await deleteComment(id);
-      // Xóa bình luận khỏi state
-      if (response.success) {
-        setComments(prevComments => 
-          prevComments.filter(comment => comment._id !== id)
-        );
-        // Xóa cả các bình luận con
-        setComments(prevComments => 
-          prevComments.filter(comment => comment.parentComment !== id)
-        );
+      if (variables.document) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { document: variables.document }],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['document', variables.document],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể xóa bình luận');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (variables.parentComment) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { parentComment: variables.parentComment }],
+        });
+      }
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  return {
-    comments,
-    loading,
-    error,
-    fetchComments,
-    addComment,
-    editComment,
-    removeComment
-  };
+export const useGetComments = (params?: IGetCommentsParams) => {
+  return useQuery<ICommentsListResponse, Error>({
+    queryKey: ['comments', params],
+    queryFn: () => getComments(params),
+  });
+};
+
+export const useUpdateComment = (): UseMutationResult<
+  ICommentResponse,
+  Error,
+  { id: string; payload: IUpdateComment }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ICommentResponse, Error, { id: string; payload: IUpdateComment }>({
+    mutationFn: ({ id, payload }) => updateComment(id, payload),
+    onSuccess: (result) => {
+      // Invalidate queries based on the comment's target
+      if (result.data.forumPost) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { forumPost: result.data.forumPost }],
+        });
+      }
+      if (result.data.task) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { task: result.data.task }],
+        });
+      }
+      if (result.data.document) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { document: result.data.document }],
+        });
+      }
+      if (result.data.parentComment) {
+        queryClient.invalidateQueries({
+          queryKey: ['comments', { parentComment: result.data.parentComment }],
+        });
+      }
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+export const useDeleteComment = (): UseMutationResult<IDeleteCommentResponse, Error, string> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<IDeleteCommentResponse, Error, string>({
+    mutationFn: (id: string) => deleteComment(id),
+    onSuccess: () => {
+      // Invalidate all comments queries since we don't know which specific one to invalidate
+      queryClient.invalidateQueries({
+        queryKey: ['comments'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
 }; 

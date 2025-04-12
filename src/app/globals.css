@@ -237,6 +237,7 @@ ul.ant-menu.ant-menu-sub.ant-menu-inline {
   }
   body {
     @apply bg-background text-foreground;
+    
   }
 
   .text-outline-green {

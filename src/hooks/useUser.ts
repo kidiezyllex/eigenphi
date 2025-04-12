@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   getUsers,
   getUserById,
@@ -6,102 +5,69 @@ import {
   deleteUser
 } from '@/api/user';
 import { IUpdateUser } from '@/interface/request/user';
-import { IUser } from '@/interface/response/user';
+import {
+  IUserResponse,
+  IUsersListResponse,
+  IDeleteUserResponse
+} from '@/interface/response/user';
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-export const useUser = () => {
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const useGetUsers = () => {
+  return useQuery<IUsersListResponse, Error>({
+    queryKey: ['users'],
+    queryFn: () => getUsers(),
+  });
+};
 
-  // Lấy danh sách người dùng (chỉ admin)
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getUsers();
-      setUsers(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách người dùng');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useGetUserById = (id: string) => {
+  return useQuery<IUserResponse, Error>({
+    queryKey: ['user', id],
+    queryFn: () => getUserById(id),
+    enabled: !!id,
+  });
+};
 
-  // Lấy thông tin người dùng theo ID
-  const fetchUserById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getUserById(id);
-      setCurrentUser(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải thông tin người dùng');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useUpdateUser = (): UseMutationResult<
+  IUserResponse,
+  Error,
+  { id: string; payload: IUpdateUser }
+> => {
+  const queryClient = useQueryClient();
 
-  // Cập nhật thông tin người dùng
-  const update = async (id: string, userData: IUpdateUser) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await updateUser(id, userData);
-      // Cập nhật state
-      if (response.data) {
-        setUsers(prevUsers =>
-          prevUsers.map(user =>
-            user._id === id ? response.data : user
-          )
-        );
-        if (currentUser && currentUser._id === id) {
-          setCurrentUser(response.data);
-        }
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể cập nhật thông tin người dùng');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  return useMutation<IUserResponse, Error, { id: string; payload: IUpdateUser }>({
+    mutationFn: ({ id, payload }) => updateUser(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['users'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['user', variables.id],
+      });
+      // Nếu đang cập nhật hồ sơ người dùng hiện tại, invalidate cả hồ sơ
+      queryClient.invalidateQueries({
+        queryKey: ['profile'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Xóa người dùng (chỉ admin)
-  const remove = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await deleteUser(id);
-      // Xóa người dùng khỏi state nếu thành công
-      setUsers(prevUsers => 
-        prevUsers.filter(user => user._id !== id)
-      );
-      if (currentUser && currentUser._id === id) {
-        setCurrentUser(null);
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể xóa người dùng');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useDeleteUser = (): UseMutationResult<IDeleteUserResponse, Error, string> => {
+  const queryClient = useQueryClient();
 
-  return {
-    users,
-    currentUser,
-    loading,
-    error,
-    fetchUsers,
-    fetchUserById,
-    update,
-    remove
-  };
+  return useMutation<IDeleteUserResponse, Error, string>({
+    mutationFn: (id: string) => deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['users'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
 }; 

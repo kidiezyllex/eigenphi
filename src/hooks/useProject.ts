@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   createProject,
   getProjects,
@@ -13,178 +12,130 @@ import {
   IUpdateProject,
   IAddProjectMember
 } from '@/interface/request/project';
-import { IProject } from '@/interface/response/project';
+import {
+  IProjectResponse,
+  IProjectsListResponse,
+  IDeleteProjectResponse
+} from '@/interface/response/project';
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-export const useProject = () => {
-  const [projects, setProjects] = useState<IProject[]>([]);
-  const [currentProject, setCurrentProject] = useState<IProject | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const useCreateProject = (): UseMutationResult<IProjectResponse, Error, ICreateProject> => {
+  const queryClient = useQueryClient();
 
-  // Lấy danh sách dự án
-  const fetchProjects = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getProjects();
-      setProjects(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  return useMutation<IProjectResponse, Error, ICreateProject>({
+    mutationFn: (projectData: ICreateProject) => createProject(projectData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Lấy chi tiết dự án theo ID
-  const fetchProjectById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getProjectById(id);
-      setCurrentProject(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải thông tin dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useGetProjects = () => {
+  return useQuery<IProjectsListResponse, Error>({
+    queryKey: ['projects'],
+    queryFn: () => getProjects(),
+  });
+};
 
-  // Tạo dự án mới
-  const create = async (projectData: ICreateProject) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await createProject(projectData);
-      // Thêm dự án mới vào state
-      if (response.success) {
-        setProjects(prevProjects => [response.data, ...prevProjects]);
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tạo dự án mới');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useGetProjectById = (id: string) => {
+  return useQuery<IProjectResponse, Error>({
+    queryKey: ['project', id],
+    queryFn: () => getProjectById(id),
+    enabled: !!id,
+  });
+};
 
-  // Cập nhật dự án
-  const update = async (id: string, projectData: IUpdateProject) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await updateProject(id, projectData);
-      // Cập nhật state
-      if (response.success) {
-        setProjects(prevProjects =>
-          prevProjects.map(project =>
-            project._id === id ? response.data : project
-          )
-        );
-        if (currentProject && currentProject._id === id) {
-          setCurrentProject(response.data);
-        }
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể cập nhật dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useUpdateProject = (): UseMutationResult<
+  IProjectResponse,
+  Error,
+  { id: string; payload: IUpdateProject }
+> => {
+  const queryClient = useQueryClient();
 
-  // Xóa dự án
-  const remove = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await deleteProject(id);
-      // Xóa dự án khỏi state nếu thành công
-      if (response.success) {
-        setProjects(prevProjects => 
-          prevProjects.filter(project => project._id !== id)
-        );
-        if (currentProject && currentProject._id === id) {
-          setCurrentProject(null);
-        }
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể xóa dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  return useMutation<IProjectResponse, Error, { id: string; payload: IUpdateProject }>({
+    mutationFn: ({ id, payload }) => updateProject(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['project', variables.id],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Thêm thành viên vào dự án
-  const addMember = async (projectId: string, memberData: IAddProjectMember) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await addProjectMember(projectId, memberData);
-      // Cập nhật state
-      if (response.success) {
-        setProjects(prevProjects =>
-          prevProjects.map(project =>
-            project._id === projectId ? response.data : project
-          )
-        );
-        if (currentProject && currentProject._id === projectId) {
-          setCurrentProject(response.data);
-        }
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể thêm thành viên vào dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+export const useDeleteProject = (): UseMutationResult<IDeleteProjectResponse, Error, string> => {
+  const queryClient = useQueryClient();
 
-  // Xóa thành viên khỏi dự án
-  const removeMember = async (projectId: string, userId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await removeProjectMember(projectId, userId);
-      // Cập nhật state
-      if (response.success) {
-        setProjects(prevProjects =>
-          prevProjects.map(project =>
-            project._id === projectId ? response.data : project
-          )
-        );
-        if (currentProject && currentProject._id === projectId) {
-          setCurrentProject(response.data);
-        }
-      }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể xóa thành viên khỏi dự án');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+  return useMutation<IDeleteProjectResponse, Error, string>({
+    mutationFn: (id: string) => deleteProject(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  return {
-    projects,
-    currentProject,
-    loading,
-    error,
-    fetchProjects,
-    fetchProjectById,
-    create,
-    update,
-    remove,
-    addMember,
-    removeMember
-  };
+export const useAddProjectMember = (): UseMutationResult<
+  IProjectResponse,
+  Error,
+  { projectId: string; memberData: IAddProjectMember }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<IProjectResponse, Error, { projectId: string; memberData: IAddProjectMember }>({
+    mutationFn: ({ projectId, memberData }) => addProjectMember(projectId, memberData),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['project', variables.projectId],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+export const useRemoveProjectMember = (): UseMutationResult<
+  IProjectResponse,
+  Error,
+  { projectId: string; userId: string }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<IProjectResponse, Error, { projectId: string; userId: string }>({
+    mutationFn: ({ projectId, userId }) => removeProjectMember(projectId, userId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['project', variables.projectId],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
 }; 

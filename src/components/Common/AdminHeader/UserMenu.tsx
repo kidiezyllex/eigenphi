@@ -11,38 +11,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-// Mock data cho thông tin người dùng
-const mockUser = {
-  id: '1',
-  name: 'Nguyễn Văn A',
-  email: 'admin@WidoFile.com',
-  role: 'Admin',
-  avatarUrl: 'https://picsum.photos/id/1005/200',
-};
-
+import { useUser } from '@/context/useUserContext';
+import { toast } from 'sonner';
+import { useProfile } from '@/hooks/authentication';
 export default function UserMenu() {
+  const { logoutUser } = useUser();
+  const {profileData} = useProfile();
   const handleLogout = () => {
-    // Logic xử lý đăng xuất ở đây
-    console.log('Đăng xuất');
+    logoutUser();
+    toast.success('Đăng xuất thành công');
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-8 w-8 cursor-pointer">
-          <AvatarImage src={mockUser.avatarUrl} alt={mockUser.name} />
+          <AvatarImage src={profileData?.data.avatar} alt={profileData?.data.fullName} />
           <AvatarFallback>
-            {mockUser.name.split(' ').pop()?.charAt(0) || 'U'}
+            {profileData?.data.fullName.split(' ').pop()?.charAt(0) || 'U'}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{mockUser.name}</p>
-            <p className="text-xs leading-none text-gray-400">{mockUser.email}</p>
-            <p className="text-xs leading-none text-primary mt-1">{mockUser.role}</p>
+            <p className="text-sm font-medium leading-none">{profileData?.data.fullName}</p>
+            <p className="text-xs leading-none text-gray-400">{profileData?.data.email}</p>
+            <p className="text-xs leading-none text-primary mt-1">{profileData?.data.role}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

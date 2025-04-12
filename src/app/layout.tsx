@@ -10,7 +10,7 @@ import "flag-icons/css/flag-icons.min.css";
 import "@fortawesome/fontawesome-svg-core/styles.css"; 
 export const metadata: Metadata = {
   title: 'WidoFile',
-  description: 'WidoFile - Cửa hàng giày thể thao chính hãng',
+  description: 'WidoFile - Hệ thống quản lý tài liệu thiết kế game',
   icons: {
     icon: '/images/faviconV2.png',
   },

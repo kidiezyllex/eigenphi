@@ -9,15 +9,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Loader2 } from "lucide-react"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 import { toast } from 'sonner';
 import { useUser } from "@/context/useUserContext"
 import { useSignIn } from "@/hooks/authentication"
 import { motion } from "framer-motion"
 
 const loginSchema = z.object({
-  username: z.string().email("Email không hợp lệ"),
+  username: z.string().min(1, "Username không được để trống"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 })
 
@@ -26,6 +25,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const signInMutation = useSignIn()
   const { loginUser } = useUser()
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -38,8 +38,8 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const response = await signInMutation.mutateAsync(data)
-      if (response && response.token) {
-        loginUser(response.user, response.token)
+      if (response && response.data?.token && response.data?.username) {
+        loginUser(response.data?.username, response.data?.token)
         toast.success("Đăng nhập thành công", {
           description: "Chào mừng bạn quay trở lại!",
         })
@@ -53,6 +53,10 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5 h-full">
@@ -61,11 +65,11 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Email</FormLabel>
+              <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Tên người dùng</FormLabel>
               <FormControl>
                 <Input 
-                  type="email" 
-                  placeholder="Nhập email của bạn" 
+                  type="text" 
+                  placeholder="Nhập tên người dùng của bạn" 
                   {...field} 
                   className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
                 />
@@ -81,12 +85,21 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
             <FormItem>
               <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Mật khẩu</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  placeholder="Nhập mật khẩu" 
-                  {...field} 
-                  className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
-                />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Nhập mật khẩu" 
+                    {...field} 
+                    className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

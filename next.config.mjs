@@ -6,15 +6,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Điều chỉnh cấu hình experimental
-  experimental: {
-    // outputFileTracingRoot: process.cwd(),
-    // outputFileTracingExcludes: {
-    //   '*': [
-    //     'node_modules/**/*',
-    //   ],
-    // },
-  },
   webpack: (config, { dev, isServer }) => {
     // Bỏ qua các cảnh báo về gói phụ thuộc nền tảng cụ thể
     config.infrastructureLogging = {
@@ -37,33 +28,20 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'picsum.photos',
-      },
-      {
-        protocol: 'https',
-        hostname: 'm.media-amazon.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'axm-vn.shop',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img6.yeshen.cc',
-      },
-      {
-        protocol: 'https',
-        hostname: 'shop.shop-worldwide-amz.top',
-      },
+      }
     ],
   },
   async rewrites() {
-    const domain =
-      process.env.NEXT_PUBLIC_API_URL || "api.example";
+    const domain = "widofile-be.onrender.com";
     return [
       {
         source: "/api/:path*",
-        destination: `https://${domain}/:path*`,
+        destination: `https://${domain}/api/:path*`,
       },
+      {
+        source: "/auth/:path*",
+        destination: `https://${domain}/auth/:path*`,
+      }
     ];
   },
 };

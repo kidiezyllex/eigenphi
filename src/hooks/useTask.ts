@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   createTask,
   getTasks,
@@ -11,136 +10,152 @@ import {
   IUpdateTask,
   IGetTasksParams
 } from '@/interface/request/task';
-import { ITask } from '@/interface/response/task';
+import {
+  ITaskResponse,
+  ITasksListResponse,
+  IDeleteTaskResponse
+} from '@/interface/response/task';
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
-export const useTask = () => {
-  const [tasks, setTasks] = useState<ITask[]>([]);
-  const [currentTask, setCurrentTask] = useState<ITask | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const useCreateTask = (): UseMutationResult<ITaskResponse, Error, ICreateTask> => {
+  const queryClient = useQueryClient();
 
-  // Lấy danh sách nhiệm vụ
-  const fetchTasks = async (params?: IGetTasksParams) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getTasks(params);
-      setTasks(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách nhiệm vụ');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Lấy chi tiết nhiệm vụ theo ID
-  const fetchTaskById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getTaskById(id);
-      setCurrentTask(response.data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải thông tin nhiệm vụ');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Tạo nhiệm vụ mới
-  const create = async (taskData: ICreateTask) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await createTask(taskData);
-      // Thêm nhiệm vụ mới vào state
-      if (response.success) {
-        setTasks(prevTasks => [response.data, ...prevTasks]);
+  return useMutation<ITaskResponse, Error, ICreateTask>({
+    mutationFn: (taskData: ICreateTask) => createTask(taskData),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks'],
+      });
+      if (variables.project) {
+        queryClient.invalidateQueries({
+          queryKey: ['tasks', { project: variables.project }],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể tạo nhiệm vụ mới');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Cập nhật nhiệm vụ
-  const update = async (id: string, taskData: IUpdateTask) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await updateTask(id, taskData);
-      // Cập nhật state
-      if (response.success) {
-        setTasks(prevTasks =>
-          prevTasks.map(task =>
-            task._id === id ? response.data : task
-          )
-        );
-        if (currentTask && currentTask._id === id) {
-          setCurrentTask(response.data);
-        }
+export const useGetTasks = (params?: IGetTasksParams) => {
+  return useQuery<ITasksListResponse, Error>({
+    queryKey: ['tasks', params],
+    queryFn: () => getTasks(params),
+  });
+};
+
+export const useGetTaskById = (id: string) => {
+  return useQuery<ITaskResponse, Error>({
+    queryKey: ['task', id],
+    queryFn: () => getTaskById(id),
+    enabled: !!id,
+  });
+};
+
+export const useUpdateTask = (): UseMutationResult<
+  ITaskResponse,
+  Error,
+  { id: string; payload: IUpdateTask }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ITaskResponse, Error, { id: string; payload: IUpdateTask }>({
+    mutationFn: ({ id, payload }) => updateTask(id, payload),
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['task', variables.id],
+      });
+      // Nếu kết quả có chứa project ID, thì invalidate query cho danh sách nhiệm vụ của dự án đó
+      if (result.data?.project?._id) {
+        queryClient.invalidateQueries({
+          queryKey: ['tasks', { project: result.data.project._id }],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể cập nhật nhiệm vụ');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Xóa nhiệm vụ
-  const remove = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await deleteTask(id);
-      // Xóa nhiệm vụ khỏi state nếu thành công
-      if (response.success) {
-        setTasks(prevTasks => 
-          prevTasks.filter(task => task._id !== id)
-        );
-        if (currentTask && currentTask._id === id) {
-          setCurrentTask(null);
-        }
+export const useDeleteTask = (): UseMutationResult<IDeleteTaskResponse, Error, string> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<IDeleteTaskResponse, Error, string>({
+    mutationFn: (id: string) => deleteTask(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks'],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+// Các hàm tiện ích
+export const useUpdateTaskStatus = (): UseMutationResult<
+  ITaskResponse,
+  Error,
+  { id: string; status: string }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ITaskResponse, Error, { id: string; status: string }>({
+    mutationFn: ({ id, status }) => updateTask(id, { status }),
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['task', variables.id],
+      });
+      if (result.data?.project?._id) {
+        queryClient.invalidateQueries({
+          queryKey: ['tasks', { project: result.data.project._id }],
+        });
       }
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Không thể xóa nhiệm vụ');
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
 
-  // Cập nhật trạng thái nhiệm vụ (hàm tiện ích)
-  const updateStatus = async (id: string, status: string) => {
-    return update(id, { status });
-  };
+export const useUpdateTaskProgress = (): UseMutationResult<
+  ITaskResponse,
+  Error,
+  { id: string; progress: number }
+> => {
+  const queryClient = useQueryClient();
 
-  // Cập nhật tiến độ nhiệm vụ (hàm tiện ích)
-  const updateProgress = async (id: string, progress: number) => {
-    return update(id, { progress });
-  };
-
-  return {
-    tasks,
-    currentTask,
-    loading,
-    error,
-    fetchTasks,
-    fetchTaskById,
-    create,
-    update,
-    remove,
-    updateStatus,
-    updateProgress
-  };
+  return useMutation<ITaskResponse, Error, { id: string; progress: number }>({
+    mutationFn: ({ id, progress }) => updateTask(id, { progress }),
+    onSuccess: (result, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['task', variables.id],
+      });
+      if (result.data?.project?._id) {
+        queryClient.invalidateQueries({
+          queryKey: ['tasks', { project: result.data.project._id }],
+        });
+      }
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
 }; 

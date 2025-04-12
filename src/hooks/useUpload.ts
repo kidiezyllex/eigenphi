@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { uploadFile, deleteFile, getFileInfo } from '@/api/upload';
+import { uploadFile as apiUploadFile, deleteFile, getFileInfo } from '@/api/upload';
 import { IUploadFile } from '@/interface/request/upload';
 import { IDocument } from '@/interface/response/document';
 
@@ -10,6 +10,18 @@ interface IFileData {
   path?: string;
 }
 
+interface ApiResponse {
+  success: boolean;
+  data: {
+    document: IDocument;
+    file: {
+      publicUrl: string;
+      path: string;
+    };
+    url?: string;
+  };
+}
+
 export const useUpload = () => {
   const [uploadedFiles, setUploadedFiles] = useState<IFileData[]>([]);
   const [currentFile, setCurrentFile] = useState<IFileData | null>(null);
@@ -18,13 +30,13 @@ export const useUpload = () => {
   const [progress, setProgress] = useState<number>(0);
 
   // Upload file mới
-  const upload = async (fileData: IUploadFile) => {
+  const upload = async (fileData: IUploadFile): Promise<ApiResponse | null> => {
     setLoading(true);
     setError(null);
     setProgress(0);
     
     try {
-      const response = await uploadFile(fileData);
+      const response = await apiUploadFile(fileData);
       
       const newFile = {
         document: response.data.document,
@@ -42,6 +54,28 @@ export const useUpload = () => {
     } finally {
       setLoading(false);
       setProgress(100);
+    }
+  };
+
+  // Upload file đơn giản để trả về url
+  const uploadFile = async (file: File): Promise<ApiResponse | null> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const fileData: IUploadFile = {
+        file: file,
+        title: file.name,
+        description: '',
+        category: 'document'
+      };
+      
+      return await upload(fileData);
+    } catch (err: any) {
+      setError(err.message || 'Không thể tải lên file');
+      return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +164,7 @@ export const useUpload = () => {
     error,
     progress,
     upload,
+    uploadFile,
     remove,
     getFileDownloadInfo,
     downloadFile
