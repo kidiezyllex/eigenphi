@@ -42,6 +42,8 @@ export const HomePage = () => {
                                                         width={200}
                                                         height={200}
                                                         className="w-full h-full object-contain"
+                                                        quality={100}
+                                                        draggable={false}
                                                     />
                                                 </Link>
                                                 <Link href="/" className={`px-1 mx-2 font-semibold py-0 text-lg whitespace-nowrap cursor-pointer hover:underline ${pathname === '/' ? 'text-[#F2A024]' : ''}`}>
@@ -80,6 +82,8 @@ export const HomePage = () => {
                                                     width={200}
                                                     height={200}
                                                     className="w-full h-full object-contain"
+                                                    quality={100}
+                                                    draggable={false}
                                                 />
                                             </Link>
                                         </div>
@@ -107,10 +111,12 @@ export const HomePage = () => {
                             <div className="w-1/2 sm:w-1/3">
                                 <Image
                                     alt="logo"
-                                    src="/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FLogo_wido.72a4c78c.png&amp;w=256&amp;q=75"
+                                    src="/images/Logo_wido.png"                                    
                                     width={101}
                                     height={68}
                                     className="sm:hidden w-20"
+                                    quality={100}
+                                    draggable={false}
                                 />
                                 <div className="hidden sm:block">
                                     <motion.h1
@@ -153,7 +159,8 @@ export const HomePage = () => {
                             <div className="mb-4 sm:mb-6">
                                 <h1 className="text-xs font-bold sm:text-lg lg:text-2xl mb-2 sm:mb-5 text-black">
                                     <Image
-                                    quality={100}
+                                        quality={100}
+                                        draggable={false}
                                         alt="&quot;"
                                         src="/images/comma.png"
                                         width={35}
@@ -175,6 +182,8 @@ export const HomePage = () => {
                         </div>
                         <div className="w-full sm:w-1/2 px-3">
                             <Image
+                                quality={100}
+                                draggable={false}
                                 alt="colorball huawei achievement"
                                 src="/images/home-image1.png"
                                 width={1024}
@@ -201,6 +210,8 @@ export const HomePage = () => {
                     >
                         <div className="w-full sm:w-1/2 px-3">
                             <Image
+                                quality={100}
+                                draggable={false}
                                 alt="img"
                                 src="/images/home-image2.png"
                                 width={1024}
@@ -215,6 +226,8 @@ export const HomePage = () => {
                             <div className="mb-4 sm:mb-6 sm:text-right">
                                 <h1 className="text-xs font-bold sm:text-lg lg:text-2xl mb-2 sm:mb-5 text-black">
                                     <Image
+                                        quality={100}
+                                        draggable={false}
                                         alt="&quot;"
                                         src="/images/comma.png"
                                         width={35}
