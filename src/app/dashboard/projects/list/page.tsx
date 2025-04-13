@@ -30,8 +30,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Icon } from '@mdi/react';
-import { mdiPlus, mdiEye, mdiPencil, mdiDelete, mdiLoading } from '@mdi/js';
+import { mdiPlus, mdiEye, mdiPencil, mdiDelete, mdiLoading, mdiDotsVertical } from '@mdi/js';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { IProject } from '@/interface/response/project';
@@ -66,19 +72,28 @@ export default function ProjectListPage() {
 
   const getStatusBadge = (status: string) => {
     switch(status.toLowerCase()) {
+      case 'planning':
+      case 'lập kế hoạch':
+        return <Badge className="!bg-purple-500/80 text-white">Lập kế hoạch</Badge>;
+      case 'in-progress':
+      case 'đang tiến hành':
+        return <Badge className="!bg-green-500/80 text-white">Đang tiến hành</Badge>;
       case 'active':
       case 'ongoing':
       case 'đang diễn ra':
-        return <Badge className="bg-green-500/80">Đang diễn ra</Badge>;
+        return <Badge className="!bg-green-500/80 text-white">Đang diễn ra</Badge>;
       case 'completed':
       case 'hoàn thành':
-        return <Badge className="bg-blue-500/80">Hoàn thành</Badge>;
+        return <Badge className="!bg-blue-500/80 text-white">Hoàn thành</Badge>;
+      case 'on-hold':
+      case 'tạm hoãn':
+        return <Badge className="!bg-orange-500/80 text-white">Tạm hoãn</Badge>;
       case 'pending':
       case 'chờ xử lý':
-        return <Badge className="bg-yellow-500/80">Chờ xử lý</Badge>;
+        return <Badge className="!bg-yellow-500/80 text-white">Chờ xử lý</Badge>;
       case 'cancelled':
       case 'đã hủy':
-        return <Badge className="bg-red-500/80">Đã hủy</Badge>;
+        return <Badge className="!bg-red-500/80 text-white">Đã hủy</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -187,7 +202,7 @@ export default function ProjectListPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-md border bg-white">
           <Table>
             <TableHeader>
               <TableRow>
@@ -206,27 +221,38 @@ export default function ProjectListPage() {
                   <TableCell>{formatDate(project.startDate)}</TableCell>
                   <TableCell>{formatDate(project.endDate)}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Link href={`/dashboard/projects/${project._id}`}>
-                        <Button variant="outline" size="icon" title="Xem chi tiết">
-                          <Icon path={mdiEye} size={0.8} />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="rounded-full h-8 w-8 bg-gray"
+                        >
+                          <Icon path={mdiDotsVertical} size={0.7} className="text-gray-500" />
                         </Button>
-                      </Link>
-                      <Link href={`/dashboard/projects/edit/${project._id}`}>
-                        <Button variant="outline" size="icon" title="Chỉnh sửa">
-                          <Icon path={mdiPencil} size={0.8} />
-                        </Button>
-                      </Link>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => openDeleteDialog(project)}
-                        title="Xóa"
-                      >
-                        <Icon path={mdiDelete} size={0.8} />
-                      </Button>
-                    </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <Link href={`/dashboard/projects/${project._id}`} className="w-full">
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Icon path={mdiEye} size={0.7} className="mr-2 text-blue-500" />
+                            <span>Xem chi tiết</span>
+                          </DropdownMenuItem>
+                        </Link>
+                        <Link href={`/dashboard/projects/edit/${project._id}`} className="w-full">
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Icon path={mdiPencil} size={0.7} className="mr-2 text-blue-500" />
+                            <span>Chỉnh sửa</span>
+                          </DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50"
+                          onClick={() => openDeleteDialog(project)}
+                        >
+                          <Icon path={mdiDelete} size={0.7} className="mr-2" />
+                          <span>Xóa</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -237,7 +263,7 @@ export default function ProjectListPage() {
 
       {/* Dialog xác nhận xóa dự án */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[1000px] max-h-[90vh] p-0">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
           <ScrollArea className="max-h-[80vh]">
             <div className="p-6">
               <DialogHeader className="pb-4">

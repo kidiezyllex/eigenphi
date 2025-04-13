@@ -7,7 +7,24 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
 }
 
 function getLocalAccessToken() {
+  // Thử lấy token từ cookies trước
   const accessToken = cookies.get('accessToken');
+  
+  // Nếu token không có trong cookies, thử lấy từ localStorage
+  if (!accessToken && typeof window !== 'undefined') {
+    try {
+      const tokenFromStorage = localStorage.getItem('token');
+      if (tokenFromStorage) {
+        const parsedToken = JSON.parse(tokenFromStorage);
+        // Lưu lại token vào cookies để dùng cho các request tiếp theo
+        cookies.set('accessToken', parsedToken.token || parsedToken);
+        return parsedToken.token || parsedToken;
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy token từ localStorage:', error);
+    }
+  }
+  
   return accessToken;
 }
 
@@ -41,20 +58,20 @@ export function logout() {
     window.location.replace("/auth");
   }
 }
-instance.interceptors.response.use(
-  (res) => {
-    return res;
-  },
-  async (err) => {
-    if (err.response) {
-      if (err.response.status === 403 || err.response.status === 401) {
-        cookies.remove("accessToken");
-        localStorage?.clear();
-      }
-    }
-    return Promise.reject(err);
-  }
-);
+// instance.interceptors.response.use(
+//   (res) => {
+//     return res;
+//   },
+//   async (err) => {
+//     if (err.response) {
+//       if (err.response.status === 403 || err.response.status === 401) {
+//         cookies.remove("accessToken");
+//         localStorage?.clear();
+//       }
+//     }
+//     return Promise.reject(err);
+//   }
+// );
 
 export const sendGet = async (url: string, params?: any): Promise<any> => {
   const response = await instance.get(url, { params });

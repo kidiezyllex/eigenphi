@@ -186,14 +186,13 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary">Chỉnh sửa dự án: {data?.data.name}</h1>
       </div>
-
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Thông tin dự án</CardTitle>
+          
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -354,7 +353,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
                       <FormLabel>Thể loại game</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ví dụ: RPG, FPS, Puzzle,..." 
+                          placeholder="Ví dụ: RPG, FPS, MOBA, Puzzle, Action, Adventure, Strategy, Simulation..." 
                           {...field} 
                           className='bg-white focus:border-primary focus:ring-primary'
                         />
@@ -372,7 +371,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
                       <FormLabel>Nền tảng game</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ví dụ: PC, Mobile, Console,..." 
+                          placeholder="Ví dụ: PC, Mobile (iOS/Android), PS5, Xbox, Nintendo Switch, Web..." 
                           {...field} 
                           className='bg-white focus:border-primary focus:ring-primary'
                         />

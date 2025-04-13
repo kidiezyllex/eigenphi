@@ -151,7 +151,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-[#2C8B3D]">
-          {isMyPosts ? 'Bài viết của tôi' : 'Diễn đàn dự án'}
+          {isMyPosts ? 'Bài viết của tôi' : 'Thảo luận dự án'}
         </h1>
         <Button 
           className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"

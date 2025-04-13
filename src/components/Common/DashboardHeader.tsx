@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@mdi/react';
 import { 
@@ -25,14 +25,19 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useUser } from '@/context/useUserContext';
 import { useProfile } from '@/hooks/authentication';
+import ProfileDialog from './ProfileDialog';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardHeader() {
   const { toggle } = useMenuSidebar();
   const { logoutUser } = useUser();
   const {profileData} = useProfile();
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const router = useRouter();
   const handleLogout = () => {
     logoutUser();
     toast.success('Đăng xuất thành công');
+    router.push('/auth');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -65,7 +70,7 @@ export default function DashboardHeader() {
         </form>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full hover:bg-gray-50">
@@ -143,17 +148,19 @@ export default function DashboardHeader() {
               </div>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="py-2 cursor-pointer">
+            <DropdownMenuItem className="py-2 cursor-pointer" onClick={() => setIsProfileDialogOpen(true)}>
               <Icon path={mdiAccount} size={0.8} className="mr-2 text-gray-400" />
               <span className='text-maintext font-semibold'>Hồ sơ cá nhân</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="py-2 cursor-pointer text-red-600" onClick={handleLogout}>
-              <Icon path={mdiLogout} size={0.8} className="mr-2" />
+              <Icon path={mdiLogout} size={0.8} className="mr-2 text-red-600" />
               <span className='text-red-600 font-semibold'>Đăng xuất</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      <ProfileDialog isOpen={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen} />
     </div>
   );
 } 

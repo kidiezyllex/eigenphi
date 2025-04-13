@@ -1,7 +1,9 @@
 'use client';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useProfile } from '@/hooks/authentication';
 import { useEffect, useState } from 'react';
+import { CustomScrollArea } from '@/components/ui/custom-scroll-area';
 
 export default function DashboardPageLayout({
   children,
@@ -9,15 +11,16 @@ export default function DashboardPageLayout({
   children: React.ReactNode;
 }) {
   const [userRole, setUserRole] = useState<'admin' | 'employee'>('employee');
-
+  const { profileData } = useProfile();
   useEffect(() => {
-    // Kiểm tra quyền của người dùng từ localStorage hoặc thông tin đăng nhập
-    // Đây là ví dụ đơn giản, trong thực tế cần kiểm tra từ JWT token hoặc phiên đăng nhập
-    const role = localStorage.getItem('userRole');
-    if (role === 'admin') {
+    if (profileData?.data?.role && profileData?.data?.role === 'admin') {
       setUserRole('admin');
     }
-  }, []);
+  }, [profileData]);
 
-  return <DashboardLayout userRole={userRole}>{children}</DashboardLayout>;
+  return <DashboardLayout userRole={userRole}>
+    <CustomScrollArea className="h-full">
+      {children}
+    </CustomScrollArea>
+    </DashboardLayout>;
 } 

@@ -90,7 +90,7 @@ export const dashboardMenuItems: MenuItem[] = [
   },
   {
     id: 'forum',
-    name: 'Diễn đàn dự án',
+    name: 'Thảo luận dự án',
     path: '/dashboard/forum',
     icon: mdiForum,
     subMenu: [
@@ -109,42 +109,12 @@ export const dashboardMenuItems: MenuItem[] = [
         name: 'Tạo bài viết mới',
         path: '/dashboard/forum/create',
       },
-    ],
-  },
-  {
-    id: 'comments',
-    name: 'Bình luận',
-    path: '/dashboard/comments',
-    icon: mdiCommentTextMultiple,
-    subMenu: [
-      {
-        id: 'comments-task',
-        name: 'Bình luận nhiệm vụ',
-        path: '/dashboard/comments/task',
-      },
-      {
-        id: 'comments-member',
-        name: 'Bình luận thành viên',
-        path: '/dashboard/comments/member',
-      },
       {
         id: 'comments-post',
         name: 'Bình luận bài viết',
-        path: '/dashboard/comments/post',
+        path: '/dashboard/forum/comments',
       },
     ],
-  },
-  {
-    id: 'schedule',
-    name: 'Lịch trình làm việc',
-    path: '/dashboard/schedule',
-    icon: mdiCalendarMonth,
-  },
-  {
-    id: 'notes',
-    name: 'Ghi chú cá nhân',
-    path: '/dashboard/notes',
-    icon: mdiNoteText,
   },
 ];
 
@@ -165,11 +135,6 @@ export const adminMenuItems: MenuItem[] = [
         id: 'users-create',
         name: 'Thêm người dùng mới',
         path: '/dashboard/admin/users/create',
-      },
-      {
-        id: 'users-roles',
-        name: 'Phân quyền người dùng',
-        path: '/dashboard/admin/users/roles',
       },
     ],
   },

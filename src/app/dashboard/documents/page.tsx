@@ -234,7 +234,7 @@ export default function DocumentsPage() {
             ) : (
               <div className="space-y-4">
                 {recentDocuments.map((doc) => (
-                  <div key={doc._id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/10 transition-colors">
+                  <div key={doc._id} className="flex items-center gap-4 p-3 rounded-md hover:bg-muted/10 transition-colors">
                     <div className="p-2 bg-muted/20 rounded-md">
                       <Icon 
                         path={getFileIcon(doc.filePath)} 
@@ -269,7 +269,7 @@ export default function DocumentsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-muted/10 rounded-md">
+              <div className="flex items-center gap-4 p-3 bg-muted/10 rounded-md">
                 <div className="p-2 bg-blue-100 rounded-md">
                   <Icon path={mdiFileImageOutline} size={1} className="text-blue-600" />
                 </div>
@@ -280,7 +280,7 @@ export default function DocumentsPage() {
                 <Badge variant="outline">{documentTypes.image}</Badge>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-muted/10 rounded-md">
+              <div className="flex items-center gap-4 p-3 bg-muted/10 rounded-md">
                 <div className="p-2 bg-red-100 rounded-md">
                   <Icon path={mdiFilePdfBox} size={1} className="text-red-600" />
                 </div>
@@ -291,7 +291,7 @@ export default function DocumentsPage() {
                 <Badge variant="outline">{documentTypes.pdf}</Badge>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-muted/10 rounded-md">
+              <div className="flex items-center gap-4 p-3 bg-muted/10 rounded-md">
                 <div className="p-2 bg-blue-100 rounded-md">
                   <Icon path={mdiFileWordBoxOutline} size={1} className="text-blue-700" />
                 </div>
@@ -302,7 +302,7 @@ export default function DocumentsPage() {
                 <Badge variant="outline">{documentTypes.word}</Badge>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-muted/10 rounded-md">
+              <div className="flex items-center gap-4 p-3 bg-muted/10 rounded-md">
                 <div className="p-2 bg-green-100 rounded-md">
                   <Icon path={mdiFileExcelBoxOutline} size={1} className="text-green-600" />
                 </div>
@@ -313,7 +313,7 @@ export default function DocumentsPage() {
                 <Badge variant="outline">{documentTypes.excel}</Badge>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-muted/10 rounded-md">
+              <div className="flex items-center gap-4 p-3 bg-muted/10 rounded-md">
                 <div className="p-2 bg-gray-100 rounded-md">
                   <Icon path={mdiFileDocumentOutline} size={1} className="text-gray-600" />
                 </div>

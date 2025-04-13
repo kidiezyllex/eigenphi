@@ -66,7 +66,7 @@ export default function CreateProjectPage() {
     defaultValues: {
       name: '',
       description: '',
-      status: 'pending',
+      status: 'planning',
     },
   });
 
@@ -116,7 +116,7 @@ export default function CreateProjectPage() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Thông tin dự án</CardTitle>
+          <CardTitle className='text-maintext'>Thông tin dự án</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -126,7 +126,7 @@ export default function CreateProjectPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên dự án</FormLabel>
+                    <FormLabel className='text-maintext'>Tên dự án</FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="Nhập tên dự án" 
@@ -144,7 +144,7 @@ export default function CreateProjectPage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mô tả dự án</FormLabel>
+                    <FormLabel className='text-maintext'>Mô tả dự án</FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="Nhập mô tả dự án" 
@@ -163,7 +163,7 @@ export default function CreateProjectPage() {
                   name="startDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Ngày bắt đầu</FormLabel>
+                      <FormLabel className='text-maintext'>Ngày bắt đầu</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -205,7 +205,7 @@ export default function CreateProjectPage() {
                   name="endDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Ngày kết thúc</FormLabel>
+                      <FormLabel className='text-maintext'>Ngày kết thúc</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -247,21 +247,21 @@ export default function CreateProjectPage() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trạng thái</FormLabel>
+                      <FormLabel className='text-maintext'>Trạng thái</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className='bg-white focus:border-primary focus:ring-primary'>
+                          <SelectTrigger className='bg-white focus:border-primary focus:ring-primary rounded-sm'>
                             <SelectValue placeholder="Chọn trạng thái" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pending">Chờ xử lý</SelectItem>
-                          <SelectItem value="active">Đang diễn ra</SelectItem>
+                        <SelectContent className='rounded-sm'>
+                          <SelectItem value="planning">Lập kế hoạch</SelectItem>
+                          <SelectItem value="in-progress">Đang tiến hành</SelectItem>
                           <SelectItem value="completed">Hoàn thành</SelectItem>
-                          <SelectItem value="cancelled">Đã hủy</SelectItem>
+                          <SelectItem value="on-hold">Tạm hoãn</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -274,10 +274,10 @@ export default function CreateProjectPage() {
                   name="gameGenre"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thể loại game</FormLabel>
+                      <FormLabel className='text-maintext'>Thể loại game</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ví dụ: RPG, FPS, Puzzle,..." 
+                         placeholder="Ví dụ: RPG, FPS, MOBA, Puzzle, Action, Adventure, Strategy, Simulation..." 
                           {...field} 
                           className='bg-white focus:border-primary focus:ring-primary'
                         />
@@ -292,10 +292,10 @@ export default function CreateProjectPage() {
                   name="gamePlatform"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nền tảng game</FormLabel>
+                      <FormLabel className='text-maintext'>Nền tảng game</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Ví dụ: PC, Mobile, Console,..." 
+                          placeholder="Ví dụ: PC, Mobile (iOS/Android), PS5, Xbox, Nintendo Switch, Web..." 
                           {...field} 
                           className='bg-white focus:border-primary focus:ring-primary'
                         />

@@ -16,7 +16,7 @@ export const useAuth = () => {
     try {
       const response = await signIn(credentials);
       // Lưu token vào localStorage hoặc cookie
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.data.token);
       // Lấy thông tin profile
       await fetchUserProfile();
       router.push('/dashboard');
@@ -35,7 +35,7 @@ export const useAuth = () => {
     try {
       const response = await register(userData);
       // Lưu token vào localStorage hoặc cookie
-      localStorage.setItem('token', response.token);
+      localStorage.setItem('token', response.data.token);
       // Lấy thông tin profile
       await fetchUserProfile();
       router.push('/dashboard');

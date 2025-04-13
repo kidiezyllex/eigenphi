@@ -348,7 +348,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 <div className="space-y-4">
                   {project.members.map((member) => (
                     <div key={member.user._id} className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         <Avatar>
                           {member.user.avatar ? (
                             <AvatarImage src={member.user.avatar} alt={member.user.fullName} />

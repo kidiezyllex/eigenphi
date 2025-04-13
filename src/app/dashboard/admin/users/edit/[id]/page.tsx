@@ -9,7 +9,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Icon } from '@mdi/react';
 import { mdiContentSave, mdiArrowLeft, mdiRefresh } from '@mdi/js';
@@ -45,25 +46,33 @@ export default function EditUserPage({ params }: EditUserPageProps) {
   const router = useRouter();
   const { data: userData, isLoading } = useGetUserById(params.id);
   const updateUser = useUpdateUser();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    isAdmin: false,
+    role: '',
+    bio: '',
+    position: '',
+    department: '',
+    skills: [] as string[],
   });
 
   // Cập nhật form khi có dữ liệu người dùng
   useEffect(() => {
     if (userData?.data) {
+      const user = userData.data;
       setFormData({
-        name: userData.data.fullName || '',
-        email: userData.data.email || '',
+        fullName: user.fullName || '',
+        email: user.email || '',
         password: '',
         confirmPassword: '',
-        isAdmin: userData.data.role === 'admin',
+        role: user.role || '',
+        bio: user.bio || '',
+        position: user.position || '',
+        department: user.department || '',
+        skills: user.skills || [],
       });
     }
   }, [userData]);
@@ -74,7 +83,7 @@ export default function EditUserPage({ params }: EditUserPageProps) {
   };
 
   const handleSelectChange = (value: string, name: string) => {
-    setFormData(prev => ({ ...prev, [name]: value === 'true' }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,13 +107,15 @@ export default function EditUserPage({ params }: EditUserPageProps) {
     }
 
     try {
-      setIsSubmitting(true);
-      
       // Chỉ gửi password nếu có nhập
       const payload: any = {
-        name: formData.name,
+        fullName: formData.fullName,
         email: formData.email,
-        isAdmin: formData.isAdmin,
+        role: formData.role,
+        bio: formData.bio,
+        position: formData.position,
+        department: formData.department,
+        skills: formData.skills,
       };
       
       if (formData.password) {
@@ -130,8 +141,6 @@ export default function EditUserPage({ params }: EditUserPageProps) {
       toast.error('Lỗi', {
         description: 'Không thể cập nhật thông tin người dùng'
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
   
@@ -179,10 +188,6 @@ export default function EditUserPage({ params }: EditUserPageProps) {
               ))}
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end space-x-2">
-            <Skeleton className="h-10 w-24" />
-            <Skeleton className="h-10 w-36" />
-          </CardFooter>
         </Card>
       </div>
     );
@@ -220,128 +225,150 @@ export default function EditUserPage({ params }: EditUserPageProps) {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Thông tin người dùng</CardTitle>
-            <CardDescription>
-              Chỉnh sửa thông tin người dùng trong hệ thống
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Họ và tên <span className="text-red-500">*</span></Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Nhập họ và tên người dùng"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="email@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu {!params.id.includes('new') && <span className="text-sm text-gray-500">(để trống nếu không muốn thay đổi)</span>}</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Nhập mật khẩu mới"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Xác nhận mật khẩu {formData.password && <span className="text-red-500">*</span>}</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="Nhập lại mật khẩu mới"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  required={!!formData.password}
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
+      <Card>
+        <CardHeader>
+          <CardTitle>Thông tin người dùng</CardTitle>
+          <CardDescription>
+            Chỉnh sửa thông tin người dùng trong hệ thống
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ScrollArea className="max-h-[70vh]">
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Họ và tên <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Nhập họ và tên người dùng"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="email@example.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Mật khẩu mới (để trống nếu không đổi)</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Nhập mật khẩu mới"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Xác nhận mật khẩu mới"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Vai trò <span className="text-red-500">*</span></Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) => handleSelectChange(value, 'role')}
+                  >
+                    <SelectTrigger id="role" className='bg-white focus:border-primary focus:ring-primary'>
+                      <SelectValue placeholder="Chọn vai trò người dùng" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="employee">Nhân viên</SelectItem>
+                      <SelectItem value="admin">Quản trị viên</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="position">Chức vụ</Label>
+                  <Input
+                    id="position"
+                    name="position"
+                    placeholder="Nhập chức vụ"
+                    value={formData.position}
+                    onChange={handleInputChange}
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="department">Phòng ban</Label>
+                  <Input
+                    id="department"
+                    name="department"
+                    placeholder="Nhập phòng ban"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    className="bg-white focus:border-primary focus:ring-primary"
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="bio">Giới thiệu</Label>
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    placeholder="Nhập thông tin giới thiệu"
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    className="bg-white focus:border-primary focus:ring-primary min-h-[100px]"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="isAdmin">Vai trò <span className="text-red-500">*</span></Label>
-                <Select
-                  value={formData.isAdmin ? 'true' : 'false'}
-                  onValueChange={(value) => handleSelectChange(value, 'isAdmin')}
+              <div className="flex justify-end space-x-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  type="button"
+                  onClick={() => router.push('/dashboard/admin/users')}
                 >
-                  <SelectTrigger id="isAdmin" className='bg-white focus:border-primary focus:ring-primary'>
-                    <SelectValue placeholder="Chọn vai trò người dùng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="false">Người dùng thông thường</SelectItem>
-                    <SelectItem value="true">Quản trị viên</SelectItem>
-                  </SelectContent>
-                </Select>
+                  Hủy
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-primary hover:bg-primary/90"
+                  disabled={updateUser.isPending}
+                >
+                  {updateUser.isPending ? (
+                    <>Đang xử lý...</>
+                  ) : (
+                    <>
+                      <Icon path={mdiContentSave} size={0.8} className="mr-2" />
+                      Lưu thay đổi
+                    </>
+                  )}
+                </Button>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button 
-              type="button"
-              variant="outline"
-              className="text-orange-500 border-orange-500 hover:bg-orange-50"
-              onClick={() => {
-                if (userData?.data) {
-                  setFormData({
-                    name: userData.data.fullName || '',
-                    email: userData.data.email || '',
-                    password: '',
-                    confirmPassword: '',
-                    isAdmin: userData.data.role === 'admin',
-                  });
-                }
-              }}
-            >
-              <Icon path={mdiRefresh} size={0.8} className="mr-2" />
-              Khôi phục
-            </Button>
-            
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                type="button"
-                onClick={() => router.push('/dashboard/admin/users')}
-              >
-                Hủy
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-primary hover:bg-primary/90"
-                disabled={isSubmitting}
-              >
-                <Icon path={mdiContentSave} size={0.8} className="mr-2" />
-                {isSubmitting ? 'Đang xử lý...' : 'Lưu thay đổi'}
-              </Button>
-            </div>
-          </CardFooter>
-        </Card>
-      </form>
+            </form>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

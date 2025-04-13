@@ -30,22 +30,28 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { useUpdateUser } from '@/hooks/useUser';
+import { useRegister } from '@/hooks/authentication';
 import { Icon } from '@mdi/react';
 import { mdiContentSave, mdiArrowLeft } from '@mdi/js';
 import Link from 'next/link';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function CreateUserPage() {
   const router = useRouter();
-  const updateUser = useUpdateUser();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const register = useRegister();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    isAdmin: false,
+    role: 'employee',
+    position: '',
+    department: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -53,13 +59,21 @@ export default function CreateUserPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const handleSelectChange = (value: string, name: string) => {
-    setFormData(prev => ({ ...prev, [name]: value === 'true' }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Kiểm tra xác nhận mật khẩu
     if (formData.password !== formData.confirmPassword) {
       toast.error('Lỗi', {
@@ -78,19 +92,12 @@ export default function CreateUserPage() {
     }
 
     try {
-      setIsSubmitting(true);
-      
-      // Trong thực tế, đây sẽ là API call tạo người dùng mới
-      // Nhưng vì hook hiện tại không có createUser, chúng ta sẽ sử dụng updateUser
-      // với ID là 'new' để giả lập (Backend sẽ xử lý theo cách riêng)
-      await updateUser.mutateAsync({
-        id: 'new', // Giả định ID mới, backend sẽ xử lý
-        payload: {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          isAdmin: formData.isAdmin,
-        }
+      await register.mutateAsync({
+        username: formData.username,
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role
       });
 
       toast.success('Thành công', {
@@ -103,8 +110,6 @@ export default function CreateUserPage() {
       toast.error('Lỗi', {
         description: 'Không thể tạo người dùng mới'
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -117,22 +122,18 @@ export default function CreateUserPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/admin">Quản trị</BreadcrumbLink>
+            <BreadcrumbLink href="/dashboard/admin/users">Quản lý người dùng</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/dashboard/admin/users">Người dùng</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Thêm mới</BreadcrumbPage>
+            <BreadcrumbPage className='text-maintext font-semibold'>Thêm người dùng mới</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-maintext">Thêm người dùng mới</h1>
-        <Button variant="outline">
+        <Button variant="default">
           <Link href="/dashboard/admin/users" className="flex items-center">
             <Icon path={mdiArrowLeft} size={0.8} className="mr-2" />
             Quay lại danh sách
@@ -140,107 +141,161 @@ export default function CreateUserPage() {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Thông tin người dùng</CardTitle>
-            <CardDescription>
-              Nhập thông tin cơ bản để tạo tài khoản người dùng mới
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Họ và tên <span className="text-red-500">*</span></Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Nhập họ và tên người dùng"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="email@example.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Mật khẩu <span className="text-red-500">*</span></Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Nhập mật khẩu"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  className="bg-white focus:border-primary focus:ring-primary"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Xác nhận mật khẩu <span className="text-red-500">*</span></Label>
+      <Card>
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="username" className='text-maintext'>Tên đăng nhập <span className="text-red-500">*</span></Label>
+              <Input
+                id="username"
+                name="username"
+                placeholder="Nhập tên đăng nhập"
+                value={formData.username}
+                onChange={handleInputChange}
+                required
+                className="bg-white focus:border-primary focus:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className='text-maintext'>Xác nhận mật khẩu <span className="text-red-500">*</span></Label>
+              <div className="relative">
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   required
-                  className="bg-white focus:border-primary focus:ring-primary"
+                  className="bg-white focus:border-primary focus:ring-primary pr-10"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="isAdmin">Vai trò <span className="text-red-500">*</span></Label>
-                <Select
-                  value={formData.isAdmin ? 'true' : 'false'}
-                  onValueChange={(value) => handleSelectChange(value, 'isAdmin')}
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  <SelectTrigger id="isAdmin" className='bg-white focus:border-primary focus:ring-primary'>
-                    <SelectValue placeholder="Chọn vai trò người dùng" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="false">Người dùng thông thường</SelectItem>
-                    <SelectItem value="true">Quản trị viên</SelectItem>
-                  </SelectContent>
-                </Select>
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-end space-x-2">
-            <Button 
-              variant="outline" 
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className='text-maintext'>Email <span className="text-red-500">*</span></Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="email@example.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="bg-white focus:border-primary focus:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role" className='text-maintext'>Vai trò <span className="text-red-500">*</span></Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) => handleSelectChange(value, 'role')}
+              >
+                <SelectTrigger id="role" className='bg-white focus:border-primary focus:ring-primary'>
+                  <SelectValue placeholder="Chọn vai trò người dùng" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Quản trị viên</SelectItem>
+                  <SelectItem value="employee">Nhân viên</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className='text-maintext'>Họ và tên <span className="text-red-500">*</span></Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                placeholder="Nhập họ và tên người dùng"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                required
+                className="bg-white focus:border-primary focus:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="position" className='text-maintext'>Chức vụ</Label>
+              <Input
+                id="position"
+                name="position"
+                placeholder="Nhập chức vụ"
+                value={formData.position}
+                onChange={handleInputChange}
+                className="bg-white focus:border-primary focus:ring-primary"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className='text-maintext'>Mật khẩu <span className="text-red-500">*</span></Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Nhập mật khẩu"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-white focus:border-primary focus:ring-primary pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department" className='text-maintext'>Phòng ban</Label>
+              <Input
+                id="department"
+                name="department"
+                placeholder="Nhập phòng ban"
+                value={formData.department}
+                onChange={handleInputChange}
+                className="bg-white focus:border-primary focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-6">
+            <Button
+              variant="outline"
               type="button"
               onClick={() => router.push('/dashboard/admin/users')}
             >
               Hủy
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="bg-primary hover:bg-primary/90"
-              disabled={isSubmitting}
+              disabled={register.isPending}
             >
-              <Icon path={mdiContentSave} size={0.8} className="mr-2" />
-              {isSubmitting ? 'Đang xử lý...' : 'Lưu người dùng'}
+              {register.isPending ? (
+                <>Đang xử lý...</>
+              ) : (
+                <>
+                  <Icon path={mdiContentSave} size={0.8} className="mr-2" />
+                  Lưu người dùng
+                </>
+              )}
             </Button>
-          </CardFooter>
-        </Card>
-      </form>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 } 

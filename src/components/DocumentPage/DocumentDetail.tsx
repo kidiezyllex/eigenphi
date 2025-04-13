@@ -389,7 +389,7 @@ export default function DocumentDetail({ id, onBack }: DocumentDetailProps) {
             <div className="space-y-4">
               <div className="space-y-1">
                 <h3 className="font-medium text-sm text-muted-foreground">Thông tin tập tin</h3>
-                <div className="flex items-center gap-3 p-4 bg-background rounded-md border border-border">
+                <div className="flex items-center gap-4 p-4 bg-background rounded-md border border-border">
                   <div className="p-3 bg-primary/10 rounded-full">
                     <Icon 
                       path={getFileIcon(document.filePath)} 
@@ -408,7 +408,7 @@ export default function DocumentDetail({ id, onBack }: DocumentDetailProps) {
 
               <div className="space-y-1">
                 <h3 className="font-medium text-sm text-muted-foreground">Tạo bởi</h3>
-                <div className="flex items-center gap-3 p-3 bg-background rounded-md border border-border">
+                <div className="flex items-center gap-4 p-3 bg-background rounded-md border border-border">
                   <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
                     {document.creator.avatar ? (
                       <img 

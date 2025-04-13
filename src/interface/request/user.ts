@@ -19,9 +19,16 @@ export interface IUserRequest {
 
 export interface IUpdateUser {
   name?: string;
+  fullName?: string;
   email?: string;
   password?: string;
   isAdmin?: boolean;
+  bio?: string;
+  position?: string;
+  department?: string;
+  skills?: string[];
+  avatar?: string;
+  role?: string;
 }
 
 export interface ICreateUserComment {

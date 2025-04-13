@@ -14,12 +14,15 @@ import {
 import { useUser } from '@/context/useUserContext';
 import { toast } from 'sonner';
 import { useProfile } from '@/hooks/authentication';
+import { useRouter } from 'next/navigation';
 export default function UserMenu() {
   const { logoutUser } = useUser();
   const {profileData} = useProfile();
+  const router = useRouter();
   const handleLogout = () => {
     logoutUser();
     toast.success('Đăng xuất thành công');
+    router.push('/auth');
   };
 
   return (
@@ -57,7 +60,7 @@ export default function UserMenu() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-          <IconLogout className="mr-2 h-4 w-4" />
+          <IconLogout className="mr-2 h-4 w-4 text-red-600" />
           <span>Đăng xuất</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
