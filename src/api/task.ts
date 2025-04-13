@@ -1,12 +1,16 @@
 import {
   ICreateTask,
   IUpdateTask,
-  IGetTasksParams
+  IGetTasksParams,
+  ICreateTaskNote,
+  IUpdateTaskNote
 } from "@/interface/request/task";
 import {
   ITaskResponse,
   ITasksListResponse,
-  IDeleteTaskResponse
+  IDeleteTaskResponse,
+  ITaskNoteResponse,
+  IDeleteTaskNoteResponse
 } from "@/interface/response/task";
 import { sendGet, sendPost, sendPut, sendDelete } from "./axios";
 
@@ -48,5 +52,32 @@ export const deleteTask = async (
 ): Promise<IDeleteTaskResponse> => {
   const res = await sendDelete(`/tasks/${id}`);
   const data: IDeleteTaskResponse = res;
+  return data;
+};
+
+export const createTaskNote = async (
+  payload: ICreateTaskNote
+): Promise<ITaskNoteResponse> => {
+  const res = await sendPost(`/tasks/${payload.taskId}/notes`, payload);
+  const data: ITaskNoteResponse = res;
+  return data;
+};
+
+export const updateTaskNote = async (
+  taskId: string,
+  noteId: string,
+  payload: IUpdateTaskNote
+): Promise<ITaskNoteResponse> => {
+  const res = await sendPut(`/tasks/${taskId}/notes/${noteId}`, payload);
+  const data: ITaskNoteResponse = res;
+  return data;
+};
+
+export const deleteTaskNote = async (
+  taskId: string,
+  noteId: string
+): Promise<IDeleteTaskNoteResponse> => {
+  const res = await sendDelete(`/tasks/${taskId}/notes/${noteId}`);
+  const data: IDeleteTaskNoteResponse = res;
   return data;
 }; 

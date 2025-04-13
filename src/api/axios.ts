@@ -37,8 +37,8 @@ export function logout() {
   cookies.remove("accessToken");
   localStorage?.clear();
 
-  if (location.pathname !== "/sign-in") {
-    window.location.replace("/sign-in");
+  if (location.pathname !== "/auth") {
+    window.location.replace("/auth");
   }
 }
 instance.interceptors.response.use(

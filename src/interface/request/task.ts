@@ -23,6 +23,17 @@ export interface IUpdateTask {
   completedDate?: Date | string;
 }
 
+export interface ICreateTaskNote {
+  content: string;
+  taskId: string;
+  isPersonal?: boolean;
+}
+
+export interface IUpdateTaskNote {
+  content: string;
+  isPersonal?: boolean;
+}
+
 export interface IGetTasksParams {
   project?: string;
   status?: string;

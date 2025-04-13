@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useGetForumPosts } from '@/hooks/useForumPost';
+import { useGetForumPosts, useDeleteForumPost } from '@/hooks/useForumPost';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@mdi/react';
 import { 
@@ -15,7 +15,8 @@ import {
   mdiEye, 
   mdiPencil, 
   mdiDotsVertical,
-  mdiPlus 
+  mdiPlus,
+  mdiDelete
 } from '@mdi/js';
 import {
   DropdownMenu,
@@ -24,10 +25,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface ForumPostListProps {
   projectId?: string;
@@ -38,6 +49,9 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
+  const [deletePostId, setDeletePostId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const params: any = {};
   if (projectId) {
@@ -48,6 +62,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
   }
   
   const { data, isLoading, error } = useGetForumPosts(params);
+  const deleteForumPost = useDeleteForumPost();
 
   useEffect(() => {
     if (!data?.data) return;
@@ -75,6 +90,37 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
   const truncateContent = (content: string, length = 120) => {
     if (content.length <= length) return content;
     return content.substring(0, length) + '...';
+  };
+
+  // Xử lý xóa bài viết
+  const handleDelete = async () => {
+    if (!deletePostId) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await deleteForumPost.mutateAsync(deletePostId);
+      
+      if (response.success) {
+        toast.success("Đã xóa bài viết", {
+          description: "Bài viết đã được xóa thành công",
+        });
+      }
+    } catch (error: any) {
+      toast.error("Lỗi", {
+        description: error.message || "Đã xảy ra lỗi khi xóa bài viết",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setDeletePostId(null);
+    }
+  };
+
+  const openDeleteDialog = (e: React.MouseEvent, postId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDeletePostId(postId);
+    setIsDeleteDialogOpen(true);
   };
 
   if (isLoading) {
@@ -125,7 +171,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
           />
           <Input
             placeholder="Tìm kiếm bài viết..."
-            className="pl-10"
+            className="pl-10 bg-white focus:border-primary focus:ring-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -172,7 +218,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
                       >
                         {post.project?.name || 'Chung'}
                       </Badge>
-                      {post.isAuthor && (
+                      {(post as any).isAuthor && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -188,7 +234,11 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
                               Chỉnh sửa
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={(e) => openDeleteDialog(e, post._id)}
+                            >
+                              <Icon path={mdiDelete} size={0.7} className="mr-2" />
                               Xóa
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -236,6 +286,39 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
           ))}
         </motion.div>
       )}
+
+      {/* Dialog xác nhận xóa */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[1000px] max-h-[90vh] p-0">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-6">
+              <DialogHeader className="pb-4">
+                <DialogTitle>Xác nhận xóa bài viết</DialogTitle>
+                <DialogDescription>
+                  Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <DialogFooter className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                  disabled={isDeleting}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Đang xóa..." : "Xóa bài viết"}
+                </Button>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

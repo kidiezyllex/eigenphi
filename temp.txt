@@ -48,3 +48,17 @@
         "Mô tả": "Kế hoạch phát hành, chiến lược tiếp thị."
     }
 ]
+
+
+2. Account
+Ạc min
+{
+  "username": "ninhloan",
+  "password": "Admin123456"
+}
+
+Nhân duyên
+{
+  "username": "noanlinh",
+  "password": "Emp123456"
+}

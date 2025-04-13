@@ -3,18 +3,19 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@mdi/react';
-import { 
-  mdiFileDocumentOutline, 
-  mdiForum, 
-  mdiCommentTextMultiple, 
-  mdiClipboardListOutline 
+import {
+  mdiFileDocumentOutline,
+  mdiForum,
+  mdiCommentTextMultiple,
+  mdiClipboardListOutline
 } from '@mdi/js';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useProfile } from '@/hooks/authentication';
+import Image from 'next/image';
 
 export default function DashboardPage() {
-  const {profileData} = useProfile();
+  const { profileData } = useProfile();
   const cards = [
     {
       title: 'Tài liệu của tôi',
@@ -77,11 +78,22 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-[#2C8B3D] mb-2">Chào mừng trở lại, {profileData?.data.fullName}!</h2>
+        <h2 className="text-3xl font-bold text-[#2C8B3D] mb-2">
+          <Image
+            quality={100}
+            draggable={false}
+            alt="&quot;"
+            src="/images/comma.png"
+            width={100}
+            height={100}
+            className="w-4 sm:w-6 lg:w-7 inline mr-2"
+            style={{ transform: "translateY(-6px)" }}
+          />
+          Chào mừng trở lại, <span className="text-active">{profileData?.data.fullName}!</span></h2>
         <p className="text-gray-600">Đây là tổng quan về hoạt động của bạn trong dự án thiết kế game.</p>
       </div>
 
-      <motion.div 
+      <motion.div
         className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
         variants={container}
         initial="hidden"
@@ -89,17 +101,20 @@ export default function DashboardPage() {
       >
         {cards.map((card, index) => (
           <motion.div key={index} variants={item}>
-            <Link href={card.link}>
-              <Card className="hover:shadow-md transition-shadow">
+            <Link href={card.link} className="flex flex-col h-full">
+              <Card className="hover:shadow-md transition-shadow h-full">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-lg font-medium">{card.title}</CardTitle>
+                  <CardTitle className="text-lg font-medium text-maintext">{card.title}</CardTitle>
                   <div className={`p-2 rounded-full ${card.color}`}>
                     <Icon path={card.icon} size={1} className={card.iconColor} />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold mb-1">{card.value}</div>
-                  <p className="text-xs text-gray-500">{card.unit}</p>
+                  <div className="mb-1 flex items-baseline gap-2">
+                    <p className='text-primary font-bold text-3xl '>{card.value}</p>
+                    <p className="text-sm text-gray-500">{card.unit}</p>
+                  </div>
+
                   <p className="text-sm text-gray-500 mt-2">{card.description}</p>
                 </CardContent>
               </Card>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@mdi/react';
-import { mdiPlus, mdiPencil, mdiTrashCan, mdiFolder, mdiRefresh, mdiFolderCancel, mdiImagePlus } from '@mdi/js';
+import { mdiPlus, mdiPencil, mdiTrashCan, mdiFolder, mdiRefresh, mdiFolderCancel, mdiImagePlus, mdiHistory } from '@mdi/js';
 import {
   Card,
   CardContent,
@@ -86,7 +86,6 @@ export default function DocumentCategoriesPage() {
   const createCategory = useCreateDocumentCategory();
   const updateCategory = useUpdateDocumentCategory();
   const deleteCategory = useDeleteDocumentCategory();
-
   // Sử dụng hook upload
   const { uploadFile, loading: uploadLoading } = useUpload();
   const addFileInputRef = useRef<HTMLInputElement>(null);
@@ -133,8 +132,8 @@ export default function DocumentCategoriesPage() {
 
     try {
       const response = await uploadFile(file);
-      if (response?.success) {
-        const imageUrl = response.data.file.publicUrl;
+      if (response?.status) {
+        const imageUrl = response.data.document.fileUrl;
         setNewCategoryForm(prev => ({
           ...prev,
           icon: imageUrl
@@ -157,8 +156,8 @@ export default function DocumentCategoriesPage() {
 
     try {
       const response = await uploadFile(file);
-      if (response?.success) {
-        const imageUrl = response.data.file.publicUrl;
+      if (response?.status) {
+        const imageUrl = response.data.document.fileUrl;
         setEditCategoryForm(prev => ({
           ...prev,
           icon: imageUrl
@@ -177,6 +176,22 @@ export default function DocumentCategoriesPage() {
   // Mở hộp thoại chọn file
   const handleOpenFileDialog = () => {
     addFileInputRef.current?.click();
+  };
+
+  // Xóa ảnh trong form thêm mới
+  const handleRemoveAddImage = () => {
+    setNewCategoryForm(prev => ({
+      ...prev,
+      icon: ''
+    }));
+  };
+
+  // Xóa ảnh trong form chỉnh sửa
+  const handleRemoveEditImage = () => {
+    setEditCategoryForm(prev => ({
+      ...prev,
+      icon: ''
+    }));
   };
 
   // Mở form chỉnh sửa với dữ liệu của danh mục được chọn
@@ -368,17 +383,40 @@ export default function DocumentCategoriesPage() {
                       
                       <div className="grid gap-2">
                         <Label htmlFor="icon" className='text-maintext'>Icon (hình ảnh)</Label>
-                        <div className="flex items-center gap-3">
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            onClick={handleOpenFileDialog}
-                            disabled={createCategory.isPending || uploadLoading}
-                            className="h-9 text-maintext bg-gray-200 transition-all duration-300 hover:bg-gray-300 rounded-sm"
-                          >
-                            {uploadLoading ? "Đang tải lên..." : "Chọn hình ảnh"}
-                            <Icon path={mdiImagePlus} size={0.8} className="text-gray-400" />
-                          </Button>
+                        <div className="flex items-start gap-3">
+                          <div className="flex flex-col items-start gap-3">
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              onClick={handleOpenFileDialog}
+                              disabled={createCategory.isPending || uploadLoading}
+                              className="h-9 text-maintext bg-gray-200 transition-all duration-300 hover:bg-gray-300 rounded-sm border border-gray-100 w-full"
+                            >
+                              {uploadLoading ? "Đang tải lên..." : "Chọn hình ảnh"}
+                              <Icon path={mdiImagePlus} size={0.8} className="ml-1 text-gray-500" />
+                            </Button>
+                            {newCategoryForm.icon && (
+                              <div className="relative w-[158px] h-[158px] border rounded-md overflow-hidden shadow-sm group">
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={handleRemoveAddImage}
+                                  className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full z-10 flex items-center justify-center"
+                                >
+                                  <Icon path={mdiTrashCan} size={0.6} />
+                                </Button>
+                                <Image 
+                                  src={newCategoryForm.icon} 
+                                  alt="Icon preview" 
+                                  height={200}
+                                  width={200}
+                                  className="object-contain h-full w-full"
+                                  draggable={false}
+                                  quality={100}
+                                />
+                              </div>
+                            )}
+                          </div>
                           <input
                             type="file"
                             ref={addFileInputRef}
@@ -386,16 +424,6 @@ export default function DocumentCategoriesPage() {
                             className="hidden"
                             accept="image/*"
                           />
-                          {newCategoryForm.icon && (
-                            <div className="relative w-10 h-10 border rounded-md overflow-hidden">
-                              <Image 
-                                src={newCategoryForm.icon} 
-                                alt="Icon preview" 
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
                           <Input
                             id="icon"
                             className='bg-white focus:border-primary focus:ring-primary flex-1'
@@ -488,29 +516,41 @@ export default function DocumentCategoriesPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2 text-maintext">
                     {category.icon ? (
-                      <span className="text-xl">{category.icon}</span>
+                      <div className="h-8 w-8 min-w-8 overflow-hidden rounded-full bg-emerald-50 flex items-center justify-center">
+                        <Image 
+                          src={category.icon} 
+                          alt={category.name} 
+                          width={32} 
+                          height={32}
+                          className="object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder-icon.png"; // Fallback image
+                            // Hoặc hiển thị icon thay thế
+                            target.style.display = "none";
+                            target.parentElement!.innerHTML = `<div class="bg-emerald-100 p-1.5 rounded-full"><svg class="text-emerald-600" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"></path></svg></div>`;
+                          }}
+                        />
+                      </div>
                     ) : (
                       <div className="bg-emerald-100 p-1.5 rounded-full">
                         <Icon path={mdiFolder} size={0.9} className="text-emerald-600" />
                       </div>
                     )}
-                    <span className="font-medium">{category.name}</span>
+                    <span className="font-medium truncate">{category.name}</span>
                   </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground mt-1 flex items-center">
-                    <Icon path={mdiRefresh} size={0.6} className="mr-1 opacity-70" />
+                  <CardDescription className="text-sm text-muted-foreground mt-1 flex items-center">
+                    <Icon path={mdiHistory} size={0.7} className="mr-1 opacity-70" />
                     Tạo lúc: {formatDate(category.createdAt)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-2 flex-1 pt-4">
-                  <p className="text-sm text-maintext leading-relaxed">
+                  <p className="text-sm text-maintext leading-relaxed line-clamp-3">
                     {category.description || <span className="text-muted-foreground italic text-xs">Không có mô tả</span>}
                   </p>
                 </CardContent>
                 <CardFooter className="bg-slate-50 pt-3 pb-3">
-                  <div className="flex justify-between items-center w-full">
-                    <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs px-2 py-0.5 rounded-md">
-                      ID: {category._id.substring(0, 8)}...
-                    </Badge>
+                  <div className="w-full flex justify-end">
                     <div className="flex gap-2">
                       <Button 
                         variant="outline" 
@@ -582,17 +622,40 @@ export default function DocumentCategoriesPage() {
                   
                   <div className="grid gap-2">
                     <Label htmlFor="edit-icon">Icon (hình ảnh)</Label>
-                    <div className="flex items-center gap-3">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => editFileInputRef.current?.click()}
-                        disabled={updateCategory.isPending || uploadLoading}
-                        className="!h-9 text-maintext"
-                      >
-                        {uploadLoading ? "Đang tải lên..." : "Chọn hình ảnh"}
-                        <Icon path={mdiImagePlus} size={0.8} className="text-gray-400" />
-                      </Button>
+                    <div className="flex items-start gap-3">
+                      <div className="flex flex-col items-start gap-3">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => editFileInputRef.current?.click()}
+                          disabled={updateCategory.isPending || uploadLoading}
+                          className="!h-9 text-maintext w-full"
+                        >
+                          {uploadLoading ? "Đang tải lên..." : "Chọn hình ảnh"}
+                          <Icon path={mdiImagePlus} size={0.8} className="ml-1 text-gray-400" />
+                        </Button>
+                        {editCategoryForm.icon && (
+                          <div className="relative w-[158px] h-[158px] border rounded-md overflow-hidden shadow-sm group">
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={handleRemoveEditImage}
+                              className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            >
+                              <Icon path={mdiTrashCan} size={0.7} />
+                            </Button>
+                            <Image 
+                              src={editCategoryForm.icon} 
+                              alt="Icon preview" 
+                              height={200}
+                              width={200}
+                              className="object-contain h-full w-full"
+                              draggable={false}
+                              quality={100}
+                            />
+                          </div>
+                        )}
+                      </div>
                       <input
                         type="file"
                         ref={editFileInputRef}
@@ -600,16 +663,6 @@ export default function DocumentCategoriesPage() {
                         className="hidden"
                         accept="image/*"
                       />
-                      {editCategoryForm.icon && (
-                        <div className="relative w-10 h-10 border rounded-md overflow-hidden">
-                          <Image 
-                            src={editCategoryForm.icon} 
-                            alt="Icon preview" 
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
                       <Input
                         id="edit-icon"
                         className='bg-white focus:border-primary focus:ring-primary flex-1'

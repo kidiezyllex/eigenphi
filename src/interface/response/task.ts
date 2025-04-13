@@ -35,6 +35,7 @@ interface INote {
     fullName: string;
     avatar?: string;
   };
+  isPersonal?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -71,6 +72,17 @@ export interface ITasksListResponse {
 }
 
 export interface IDeleteTaskResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ITaskNoteResponse {
+  success: boolean;
+  message: string;
+  data: INote;
+}
+
+export interface IDeleteTaskNoteResponse {
   success: boolean;
   message: string;
 } 

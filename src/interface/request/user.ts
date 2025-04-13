@@ -23,3 +23,16 @@ export interface IUpdateUser {
   password?: string;
   isAdmin?: boolean;
 }
+
+export interface ICreateUserComment {
+  content: string;
+  userId: string;
+}
+
+export interface IUpdateUserComment {
+  content: string;
+}
+
+export interface IGetUserCommentsParams {
+  userId: string;
+}

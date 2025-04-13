@@ -20,4 +20,5 @@ export interface IGetForumPostsParams {
   author?: string;
   tag?: string;
   isPinned?: boolean;
+  myPosts?: boolean;
 } 

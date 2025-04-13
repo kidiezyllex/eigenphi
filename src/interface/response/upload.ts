@@ -10,7 +10,7 @@ export interface IUploadedFile {
   _id: string;
   title: string;
   description?: string;
-  category: {
+  category?: {
     _id: string;
     name: string;
   };
@@ -37,10 +37,11 @@ export interface IUploadedFile {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  __v?: number;
 }
 
 export interface IUploadResponse {
-  success: boolean;
+  status: boolean;
   message: string;
   data: {
     document: IUploadedFile;
@@ -49,6 +50,8 @@ export interface IUploadResponse {
       publicUrl: string;
     };
   };
+  errors: Record<string, any>;
+  timestamp: string;
 }
 
 export interface IDeleteFileResponse {

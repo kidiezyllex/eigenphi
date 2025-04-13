@@ -147,12 +147,12 @@ export function Header() {
                         </Dropdown>
 
                         {/* User Account */}
-                        <Link href="/sign-in" className="px-2">
+                        <Link href="/auth" className="px-2">
                             <div className="flex flex-col">
                                 {!isMounted ? null : (
                                     <>
                                         {!user && <span
-                                            onClick={() => router.push("/sign-in")}
+                                            onClick={() => router.push("/auth")}
                                             className="text-xs text-gray-400 transition-all duration-300 cursor-pointer">Xin chào. Đăng nhập</span>}
                                         {user && <span
                                             onClick={() => router.push("/seller/products/storehouse")}
@@ -250,7 +250,7 @@ export function Header() {
                                 <>
                                     {!user ? (
                                         <div onClick={() => {
-                                            router.push("/sign-in")
+                                            router.push("/auth")
                                             setMobileMenuOpen(false)
                                         }} className="cursor-pointer">
                                             <h3 className="font-bold text-lg">Xin chào. Đăng nhập</h3>

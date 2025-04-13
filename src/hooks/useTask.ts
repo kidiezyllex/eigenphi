@@ -3,17 +3,24 @@ import {
   getTasks,
   getTaskById,
   updateTask,
-  deleteTask
+  deleteTask,
+  createTaskNote,
+  updateTaskNote,
+  deleteTaskNote
 } from '@/api/task';
 import {
   ICreateTask,
   IUpdateTask,
-  IGetTasksParams
+  IGetTasksParams,
+  ICreateTaskNote,
+  IUpdateTaskNote
 } from '@/interface/request/task';
 import {
   ITaskResponse,
   ITasksListResponse,
-  IDeleteTaskResponse
+  IDeleteTaskResponse,
+  ITaskNoteResponse,
+  IDeleteTaskNoteResponse
 } from '@/interface/response/task';
 import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 
@@ -140,18 +147,77 @@ export const useUpdateTaskProgress = (): UseMutationResult<
 
   return useMutation<ITaskResponse, Error, { id: string; progress: number }>({
     mutationFn: ({ id, progress }) => updateTask(id, { progress }),
-    onSuccess: (result, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['tasks'],
       });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+export const useCreateTaskNote = (): UseMutationResult<ITaskNoteResponse, Error, ICreateTaskNote> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ITaskNoteResponse, Error, ICreateTaskNote>({
+    mutationFn: (noteData: ICreateTaskNote) => createTaskNote(noteData),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['task', variables.id],
+        queryKey: ['tasks', variables.taskId],
       });
-      if (result.data?.project?._id) {
-        queryClient.invalidateQueries({
-          queryKey: ['tasks', { project: result.data.project._id }],
-        });
-      }
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+export const useUpdateTaskNote = (): UseMutationResult<
+  ITaskNoteResponse, 
+  Error, 
+  { taskId: string; noteId: string; data: IUpdateTaskNote }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ITaskNoteResponse, 
+    Error, 
+    { taskId: string; noteId: string; data: IUpdateTaskNote }
+  >({
+    mutationFn: ({ taskId, noteId, data }) => updateTaskNote(taskId, noteId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', variables.taskId],
+      });
+      return;
+    },
+    onError: (error) => {
+      return error;
+    },
+  });
+};
+
+export const useDeleteTaskNote = (): UseMutationResult<
+  IDeleteTaskNoteResponse, 
+  Error, 
+  { taskId: string; noteId: string }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    IDeleteTaskNoteResponse, 
+    Error, 
+    { taskId: string; noteId: string }
+  >({
+    mutationFn: ({ taskId, noteId }) => deleteTaskNote(taskId, noteId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', variables.taskId],
+      });
       return;
     },
     onError: (error) => {

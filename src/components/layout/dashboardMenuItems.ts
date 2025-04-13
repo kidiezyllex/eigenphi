@@ -10,9 +10,33 @@ import {
   mdiFileDocumentMultipleOutline,
   mdiClipboardListOutline,
   mdiFolder,
+  mdiViewDashboard,
 } from '@mdi/js';
 
 export const dashboardMenuItems: MenuItem[] = [
+  {
+    id: 'projects',
+    name: 'Quản lý dự án',
+    path: '/dashboard/projects',
+    icon: mdiViewDashboard,
+    subMenu: [
+      {
+        id: 'projects-list',
+        name: 'Danh sách dự án',
+        path: '/dashboard/projects/list',
+      },
+      {
+        id: 'projects-create',
+        name: 'Tạo dự án mới',
+        path: '/dashboard/projects/create',
+      },
+      {
+        id: 'projects-members',
+        name: 'Quản lý thành viên',
+        path: '/dashboard/projects/members',
+      },
+    ],
+  },
   {
     id: 'document',
     name: 'Quản lý tài liệu',
@@ -38,6 +62,29 @@ export const dashboardMenuItems: MenuItem[] = [
         id: 'document-categories',
         name: 'Danh mục tài liệu',
         path: '/dashboard/document-categories',
+      },
+    ],
+  },
+  {
+    id: 'task',
+    name: 'Nhiệm vụ thiết kế',
+    path: '/dashboard/tasks',
+    icon: mdiClipboardListOutline,
+    subMenu: [
+      {
+        id: 'task-list',
+        name: 'Danh sách nhiệm vụ',
+        path: '/dashboard/tasks',
+      },
+      {
+        id: 'task-create',
+        name: 'Tạo nhiệm vụ mới',
+        path: '/dashboard/tasks/create',
+      },
+      {
+        id: 'task-my',
+        name: 'Nhiệm vụ của tôi',
+        path: '/dashboard/tasks/my-tasks',
       },
     ],
   },
@@ -88,12 +135,6 @@ export const dashboardMenuItems: MenuItem[] = [
     ],
   },
   {
-    id: 'task',
-    name: 'Nhiệm vụ thiết kế',
-    path: '/dashboard/tasks',
-    icon: mdiClipboardListOutline,
-  },
-  {
     id: 'schedule',
     name: 'Lịch trình làm việc',
     path: '/dashboard/schedule',
@@ -114,6 +155,23 @@ export const adminMenuItems: MenuItem[] = [
     name: 'Quản lý người dùng',
     path: '/dashboard/admin/users',
     icon: mdiAccountGroup,
+    subMenu: [
+      {
+        id: 'users-list',
+        name: 'Danh sách người dùng',
+        path: '/dashboard/admin/users',
+      },
+      {
+        id: 'users-create',
+        name: 'Thêm người dùng mới',
+        path: '/dashboard/admin/users/create',
+      },
+      {
+        id: 'users-roles',
+        name: 'Phân quyền người dùng',
+        path: '/dashboard/admin/users/roles',
+      },
+    ],
   },
   {
     id: 'document-categories',
