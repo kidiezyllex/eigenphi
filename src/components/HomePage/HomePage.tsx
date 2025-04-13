@@ -58,11 +58,11 @@ export const HomePage = () => {
                                                 <Link href="/career" className={`px-1 mx-2 font-semibold py-0 text-lg whitespace-nowrap cursor-pointer hover:underline ${pathname === '/career' ? 'text-[#F2A024]' : ''}`}>
                                                     <p>Tuyển dụng</p>
                                                 </Link>
-                                                <Link href="/auth" className="flex mt-5 items-center hover:bg-stone-200 cursor-pointer border rounded-xl px-5 py-2 w-fit">
-                                                    <div className="flex mt-5 items-center hover:bg-stone-200 cursor-pointer border rounded-xl px-5 py-2 w-fit">
-                                                        <Icon path={mdiGoogle} size={0.8} className="text-xl" />
+                                                <Link href="/auth" >
+                                                    <Button variant="outline" className="flex items-center hover:underline cursor-pointer border rounded-xl px-2 py-1 ml-2 text-white !bg-transparent hover:text-white/80">
+                                                        <Icon path={mdiGoogle} size={0.8} className="text-xl mr-2" />
                                                         Đăng nhập
-                                                    </div>
+                                                    </Button>
                                                 </Link>
                                             </nav>
                                         </motion.div>
@@ -103,9 +103,10 @@ export const HomePage = () => {
                                             </Link>
                                             <Link href="/auth" >
                                                 <Button variant="outline" className="flex items-center hover:underline cursor-pointer border rounded-xl px-2 py-1 ml-2 text-white !bg-transparent hover:text-white/80">
-                                                    <Icon path={mdiGoogle} size={0.8} className="text-xl" />
+                                                    <Icon path={mdiGoogle} size={0.8} className="text-xl mr-2" />
                                                     Đăng nhập
-                                                </Button></Link>
+                                                </Button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </menu>

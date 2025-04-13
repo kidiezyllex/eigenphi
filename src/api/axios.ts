@@ -46,13 +46,11 @@ instance.interceptors.response.use(
     return res;
   },
   async (err) => {
-
     if (err.response) {
       if (err.response.status === 403 || err.response.status === 401) {
-        logout();
-        return
+        cookies.remove("accessToken");
+        localStorage?.clear();
       }
-
     }
     return Promise.reject(err);
   }
