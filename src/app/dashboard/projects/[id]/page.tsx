@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGetProjectById, useUpdateProject, useRemoveProjectMember, useAddProjectMember } from '@/hooks/useProject';
+import { useGetUsers } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -23,7 +24,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Icon } from '@mdi/react';
-import { mdiPencil, mdiDelete, mdiPlus, mdiLoading, mdiAccountPlus } from '@mdi/js';
+import { mdiPencil, mdiDelete, mdiPlus, mdiLoading, mdiAccountPlus, mdiShieldAccount, mdiEmail } from '@mdi/js';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { IProject } from '@/interface/response/project';
@@ -47,17 +48,46 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { getStatusBadge } from '@/utils/constant';
 
 export default function ProjectDetailPage({ params }: { params: { id: string } }) {
   const { data, isLoading, refetch } = useGetProjectById(params.id);
   const updateProject = useUpdateProject();
   const removeProjectMember = useRemoveProjectMember();
   const addProjectMember = useAddProjectMember();
+  const { data: usersData, isLoading: isLoadingUsers } = useGetUsers();
   const [isRemoveMemberDialogOpen, setIsRemoveMemberDialogOpen] = useState(false);
-  const [memberToRemove, setMemberToRemove] = useState<{id: string, name: string} | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string, name: string } | null>(null);
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [newMemberInfo, setNewMemberInfo] = useState({ userId: '', role: 'member' });
+  const [userAvatars, setUserAvatars] = useState<{ [userId: string]: number }>({});
+  const [selectedUserName, setSelectedUserName] = useState<string>('');
   const router = useRouter();
+
+  const getRandomAvatar = (userId: string) => {
+    if (userAvatars[userId]) {
+      return userAvatars[userId];
+    }
+    return 1;
+  };
+
+  useEffect(() => {
+    if (data?.data?.members) {
+      const newAvatars = { ...userAvatars };
+      let hasChanges = false;
+
+      data.data.members.forEach((member: any) => {
+        if (!newAvatars[member.user._id]) {
+          newAvatars[member.user._id] = Math.floor(Math.random() * 4) + 1;
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        setUserAvatars(newAvatars);
+      }
+    }
+  }, [data?.data?.members]);
 
   const handleRemoveMember = async () => {
     if (!memberToRemove) return;
@@ -85,7 +115,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       });
       return;
     }
-    
+
     try {
       await addProjectMember.mutateAsync({
         projectId: params.id,
@@ -107,29 +137,16 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     }
   };
 
+  // Hàm tìm tên người dùng từ ID
+  const findUserNameById = (userId: string) => {
+    if (!usersData?.data) return '';
+    const user = usersData.data.find((user: any) => user._id === userId);
+    return user ? user.fullName : '';
+  };
+
   const openRemoveMemberDialog = (id: string, name: string) => {
     setMemberToRemove({ id, name });
     setIsRemoveMemberDialogOpen(true);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch(status.toLowerCase()) {
-      case 'active':
-      case 'ongoing':
-      case 'đang diễn ra':
-        return <Badge className="bg-green-500/80">Đang diễn ra</Badge>;
-      case 'completed':
-      case 'hoàn thành':
-        return <Badge className="bg-blue-500/80">Hoàn thành</Badge>;
-      case 'pending':
-      case 'chờ xử lý':
-        return <Badge className="bg-yellow-500/80">Chờ xử lý</Badge>;
-      case 'cancelled':
-      case 'đã hủy':
-        return <Badge className="bg-red-500/80">Đã hủy</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
   };
 
   const formatDate = (dateString?: string) => {
@@ -163,12 +180,12 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        
+
         <div className="flex justify-between items-center">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-10 w-36" />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <Card>
@@ -255,72 +272,78 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       </div>
 
       <Tabs defaultValue="details">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="details">Thông tin dự án</TabsTrigger>
-          <TabsTrigger value="members">Thành viên ({project.members.length})</TabsTrigger>
+        <TabsList className="grid w-full max-w-md grid-cols-2 bg-transparent">
+          <TabsTrigger value="details" className='data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary border-b-2 data-[state=active]:border-primary rounded-none border-transparent'>Thông tin dự án</TabsTrigger>
+          <TabsTrigger value="members" className='data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary border-b-2 data-[state=active]:border-primary rounded-none border-transparent'>Số thành viên ({project.members.length})</TabsTrigger>
         </TabsList>
         <TabsContent value="details" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Chi tiết dự án</CardTitle>
+              <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-t-primary">
+                <CardHeader className="bg-gradient-to-r from-[#F3F8F4] to-white border-b">
+                  <CardTitle className='text-maintext flex items-center gap-2'>
+                    Chi tiết dự án
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Mô tả</h3>
-                    <p className="mt-1">
+                <CardContent className="space-y-4 p-6">
+                  <div className="bg-[#F9FBFA] p-3 rounded-md">
+                    <h3 className="text-sm font-medium text-primary mb-1">Mô tả</h3>
+                    <p className="mt-1 text-maintext">
                       {project.description || 'Không có mô tả.'}
                     </p>
                   </div>
                   {(project.gameGenre || project.gamePlatform) && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {project.gameGenre && (
-                        <div>
-                          <h3 className="text-sm font-medium text-muted-foreground">Thể loại game</h3>
-                          <p className="mt-1">{project.gameGenre}</p>
+                        <div className="bg-[#F9FBFA] p-3 rounded-md">
+                          <h3 className="text-sm font-medium text-primary mb-1">Thể loại game</h3>
+                          <p className="mt-1 text-maintext font-medium">{project.gameGenre}</p>
                         </div>
                       )}
                       {project.gamePlatform && (
-                        <div>
-                          <h3 className="text-sm font-medium text-muted-foreground">Nền tảng game</h3>
-                          <p className="mt-1">{project.gamePlatform}</p>
+                        <div className="bg-[#F9FBFA] p-3 rounded-md">
+                          <h3 className="text-sm font-medium text-primary mb-1">Nền tảng game</h3>
+                          <p className="mt-1 text-maintext font-medium">{project.gamePlatform}</p>
                         </div>
                       )}
                     </div>
                   )}
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Ngày tạo</h3>
-                    <p className="mt-1">{formatDate(project.createdAt)}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Cập nhật lần cuối</h3>
-                    <p className="mt-1">{formatDate(project.updatedAt)}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-[#F9FBFA] p-3 rounded-md">
+                      <h3 className="text-sm font-medium text-primary mb-1">Ngày tạo</h3>
+                      <p className="mt-1 text-maintext font-medium">{formatDate(project.createdAt)}</p>
+                    </div>
+                    <div className="bg-[#F9FBFA] p-3 rounded-md">
+                      <h3 className="text-sm font-medium text-primary mb-1">Cập nhật lần cuối</h3>
+                      <p className="mt-1 text-maintext font-medium">{formatDate(project.updatedAt)}</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
             <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Thông tin dự án</CardTitle>
+              <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-t-primary">
+                <CardHeader className="bg-gradient-to-r from-[#F3F8F4] to-white border-b">
+                  <CardTitle className='text-maintext flex items-center gap-2'>
+                    Thông tin dự án
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Trạng thái:</span>
-                    <span>{getStatusBadge(project.status)}</span>
+                <CardContent className="space-y-4 p-6">
+                  <div className="bg-[#F9FBFA] p-3 rounded-md flex justify-between items-center">
+                    <span className="text-sm font-medium text-primary">Trạng thái:</span>
+                    <span className='text-maintext'>{getStatusBadge(project.status)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Ngày bắt đầu:</span>
-                    <span>{formatDate(project.startDate)}</span>
+                  <div className="bg-[#F9FBFA] p-3 rounded-md flex justify-between items-center">
+                    <span className="text-sm font-medium text-primary">Ngày bắt đầu:</span>
+                    <span className='text-maintext font-medium'>{formatDate(project.startDate)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Ngày kết thúc:</span>
-                    <span>{formatDate(project.endDate)}</span>
+                  <div className="bg-[#F9FBFA] p-3 rounded-md flex justify-between items-center">
+                    <span className="text-sm font-medium text-primary">Ngày kết thúc:</span>
+                    <span className='text-maintext font-medium'>{formatDate(project.endDate)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Số thành viên:</span>
-                    <span>{project.members.length}</span>
+                  <div className="bg-[#F9FBFA] p-3 rounded-md flex justify-between items-center">
+                    <span className="text-sm font-medium text-primary">Số thành viên:</span>
+                    <span className='text-maintext font-semibold'>{project.members.length}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -328,44 +351,57 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           </div>
         </TabsContent>
         <TabsContent value="members" className="mt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle>Thành viên dự án</CardTitle>
-              <Button 
-                className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"
+          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-t-primary">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 bg-gradient-to-r from-[#F3F8F4] to-white border-b">
+              <CardTitle className='text-maintext flex items-center gap-2'>
+                Thành viên dự án
+              </CardTitle>
+              <Button
+                className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90 shadow-md hover:shadow-lg transition-all duration-300"
                 onClick={() => setIsAddMemberDialogOpen(true)}
               >
                 <Icon path={mdiAccountPlus} size={0.8} className="mr-2" />
                 Thêm thành viên
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               {project.members.length === 0 ? (
-                <div className="text-center py-6">
+                <div className="text-center py-6 bg-[#F9FBFA] rounded-lg border border-dashed border-gray-300">
                   <p className="text-muted-foreground">Dự án chưa có thành viên nào.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {project.members.map((member) => (
-                    <div key={member.user._id} className="flex items-center justify-between p-3 border rounded-md">
+                    <div
+                      key={member.user._id}
+                      className="flex items-center justify-between p-4 border rounded-md hover:shadow-md transition-all duration-300 bg-[#F9FBFA] hover:bg-white"
+                    >
                       <div className="flex items-center gap-4">
-                        <Avatar>
-                          {member.user.avatar ? (
-                            <AvatarImage src={member.user.avatar} alt={member.user.fullName} />
-                          ) : null}
-                          <AvatarFallback>{member.user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{member.user.fullName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {member.role === 'lead' ? 'Trưởng nhóm' : 'Thành viên'}
-                          </p>
+                        <div className="relative p-[2px] h-10 w-10 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center">
+                          <div className="p-[2px] bg-white rounded-full">
+                            <Avatar className="!h-8 !w-8 flex-shrink-0">
+                              {member.user.avatar ? (
+                                <AvatarImage src={member.user.avatar} alt={member.user.fullName} />
+                              ) : (
+                                <AvatarImage src={`/images/dfavatar${getRandomAvatar(member.user._id)}.png`} alt={member.user.fullName} />
+                              )}
+                              <AvatarFallback className="bg-primary/10 text-primary">{member.user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                          </div>
+                        </div>
+                        <div className='flex flex-col gap-1'>
+                          <p className="font-medium text-maintext">{member.user.fullName}</p>
+                          <div className="flex items-center gap-2">
+                            <Badge className={member.role === 'lead' ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}>
+                              {member.role === 'lead' ? 'Trưởng nhóm' : 'Thành viên'}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-red-500 hover:text-red-700"
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-300 border-red-200"
                         onClick={() => openRemoveMemberDialog(member.user._id, member.user.fullName)}
                         title="Xóa thành viên"
                       >
@@ -382,7 +418,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
       {/* Dialog xác nhận xóa thành viên */}
       <Dialog open={isRemoveMemberDialogOpen} onOpenChange={setIsRemoveMemberDialogOpen}>
-        <DialogContent className="sm:max-w-[1000px] max-h-[90vh] p-0">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
           <ScrollArea className="max-h-[80vh]">
             <div className="p-6">
               <DialogHeader className="pb-4">
@@ -392,13 +428,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="pt-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsRemoveMemberDialogOpen(false)}
                 >
                   Hủy
                 </Button>
-                <Button 
+                <Button
                   variant="destructive"
                   onClick={handleRemoveMember}
                   disabled={removeProjectMember.isPending}
@@ -420,35 +456,61 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
       {/* Dialog thêm thành viên */}
       <Dialog open={isAddMemberDialogOpen} onOpenChange={setIsAddMemberDialogOpen}>
-        <DialogContent className="sm:max-w-[1000px] max-h-[90vh] p-0">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
           <ScrollArea className="max-h-[80vh]">
             <div className="p-6">
               <DialogHeader className="pb-4">
-                <DialogTitle>Thêm thành viên vào dự án</DialogTitle>
-                <DialogDescription>
-                  Nhập thông tin người dùng để thêm vào dự án.
-                </DialogDescription>
+                <DialogTitle className='text-maintext'>Thêm thành viên vào dự án</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      ID Người dùng
+                    <label className="text-sm font-medium text-maintext">
+                      Người dùng
                     </label>
-                    <Input 
-                      placeholder="Nhập ID người dùng" 
+                    <Select
                       value={newMemberInfo.userId}
-                      onChange={(e) => setNewMemberInfo({...newMemberInfo, userId: e.target.value})}
-                      className='bg-white focus:border-primary focus:ring-primary'
-                    />
+                      onValueChange={(value) => {
+                        setNewMemberInfo({ ...newMemberInfo, userId: value });
+                        setSelectedUserName(findUserNameById(value));
+                      }}
+                    >
+                      <SelectTrigger className='bg-white focus:border-primary focus:ring-primary'>
+                        <SelectValue placeholder="Chọn người dùng">
+                          {selectedUserName || "Chọn người dùng"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {isLoadingUsers ? (
+                          <div className="flex items-center justify-center py-2">
+                            <Icon path={mdiLoading} size={0.8} className="mr-2 animate-spin" />
+                            <span>Đang tải...</span>
+                          </div>
+                        ) : (
+                          usersData?.data.map((user: any) => (
+                            <SelectItem key={user._id} value={user._id} className="py-2">
+                              <div className="flex flex-col">
+                                <span className="font-medium text-maintext">{user.fullName}</span>
+                                <div className="flex text-xs text-muted-foreground mt-1 items-center">
+                                  <Icon path={mdiShieldAccount} size={0.6} className="mr-2 text-gray-400" />
+                                  <span className="mr-2">{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên'}</span>
+                                  <Icon path={mdiEmail} size={0.6} className="mr-2 text-gray-400" />
+                                  <span>{user.email}</span>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
+                    <label className="text-sm font-medium text-maintext">
                       Vai trò
                     </label>
                     <Select
                       value={newMemberInfo.role}
-                      onValueChange={(value) => setNewMemberInfo({...newMemberInfo, role: value})}
+                      onValueChange={(value) => setNewMemberInfo({ ...newMemberInfo, role: value })}
                     >
                       <SelectTrigger className='bg-white focus:border-primary focus:ring-primary'>
                         <SelectValue />
@@ -462,13 +524,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 </div>
               </div>
               <DialogFooter>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsAddMemberDialogOpen(false)}
                 >
                   Hủy
                 </Button>
-                <Button 
+                <Button
                   className="bg-[#2C8B3D] hover:bg-[#2C8B3D]/90"
                   onClick={handleAddMember}
                   disabled={addProjectMember.isPending}

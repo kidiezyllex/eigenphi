@@ -44,7 +44,7 @@ import { IProject } from '@/interface/response/project';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-
+import { getStatusBadge } from '@/utils/constant';
 export default function ProjectListPage() {
   const { data, isLoading, refetch } = useGetProjects();
   const deleteProject = useDeleteProject();
@@ -68,35 +68,6 @@ export default function ProjectListPage() {
   const openDeleteDialog = (project: IProject) => {
     setProjectToDelete(project);
     setIsDeleteDialogOpen(true);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch(status.toLowerCase()) {
-      case 'planning':
-      case 'lập kế hoạch':
-        return <Badge className="!bg-purple-500/80 text-white">Lập kế hoạch</Badge>;
-      case 'in-progress':
-      case 'đang tiến hành':
-        return <Badge className="!bg-green-500/80 text-white">Đang tiến hành</Badge>;
-      case 'active':
-      case 'ongoing':
-      case 'đang diễn ra':
-        return <Badge className="!bg-green-500/80 text-white">Đang diễn ra</Badge>;
-      case 'completed':
-      case 'hoàn thành':
-        return <Badge className="!bg-blue-500/80 text-white">Hoàn thành</Badge>;
-      case 'on-hold':
-      case 'tạm hoãn':
-        return <Badge className="!bg-orange-500/80 text-white">Tạm hoãn</Badge>;
-      case 'pending':
-      case 'chờ xử lý':
-        return <Badge className="!bg-yellow-500/80 text-white">Chờ xử lý</Badge>;
-      case 'cancelled':
-      case 'đã hủy':
-        return <Badge className="!bg-red-500/80 text-white">Đã hủy</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
   };
 
   const formatDate = (dateString?: string) => {

@@ -271,14 +271,16 @@ export default function MembersManagementPage() {
             <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 p-1 bg-[#F3F8F4]">
               <TabsTrigger
                 value="list"
-                className="data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary data-[state=active]:shadow-sm border-b-2 data-[state=active]:border-primary rounded-none border-transparent"
+                className="
+                shadow-none
+                data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary border-b-2 data-[state=active]:border-primary rounded-none border-transparent"
               >
                 <Icon path={mdiAccountMultiple} size={0.7} className="mr-2" />
                 Danh sách thành viên
               </TabsTrigger>
               <TabsTrigger
                 value="roles"
-                className="data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary data-[state=active]:shadow-sm border-b-2 data-[state=active]:border-primary rounded-none border-transparent"
+                className="shadow-none data-[state=active]:bg-[#F3F8F4] data-[state=active]:text-primary border-b-2 data-[state=active]:border-primary rounded-none border-transparent"
               >
                 <Icon path={mdiShieldAccount} size={0.7} className="mr-2" />
                 Vai trò thành viên

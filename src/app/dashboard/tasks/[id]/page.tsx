@@ -53,6 +53,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
+import { getStatusBadge } from '@/utils/constant';
 
 const statusOptions = [
   { value: 'pending', label: 'Chờ xử lý', color: 'bg-yellow-500' },
@@ -203,18 +204,6 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
     setEditNoteId(null);
     setEditNoteContent('');
   };
-
-  const getStatusBadge = (status: string) => {
-    const statusOption = statusOptions.find(option => option.value === status);
-    if (!statusOption) return null;
-
-    return (
-      <Badge className={`${statusOption.color} text-white`}>
-        {statusOption.label}
-      </Badge>
-    );
-  };
-
   const getPriorityBadge = (priority: string) => {
     const priorityOption = priorityOptions.find(option => option.value === priority);
     if (!priorityOption) return null;

@@ -48,7 +48,7 @@ import {
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
-
+import { getStatusBadge } from '@/utils/constant';
 const statusOptions = [
   { value: 'pending', label: 'Chờ xử lý', color: 'bg-yellow-500' },
   { value: 'in_progress', label: 'Đang thực hiện', color: 'bg-blue-500' },
@@ -125,17 +125,6 @@ export default function MyTasksPage() {
 
   const resetFilters = () => {
     setStatusFilter('');
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusOption = statusOptions.find(option => option.value === status);
-    if (!statusOption) return null;
-
-    return (
-      <Badge className={`${statusOption.color} text-white`}>
-        {statusOption.label}
-      </Badge>
-    );
   };
 
   const getPriorityBadge = (priority: string) => {

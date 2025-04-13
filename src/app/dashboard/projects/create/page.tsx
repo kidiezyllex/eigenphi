@@ -114,10 +114,7 @@ export default function CreateProjectPage() {
         <h1 className="text-2xl font-bold text-primary">Tạo dự án mới</h1>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className='text-maintext'>Thông tin dự án</CardTitle>
-        </CardHeader>
+      <Card className='pt-6'>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

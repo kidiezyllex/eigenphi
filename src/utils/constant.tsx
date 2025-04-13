@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { MenuProps } from "antd";
 import { ColumnsType } from "antd/es/table";
 import moment from "moment";
@@ -288,3 +289,32 @@ export const errmessageMilitary={
   sex:'Tổng số Nam + Nữ không được lớn hơn Tổng số QNCN + Sĩ quan',
   absent:'Cộng vắng không được lớn hơn Tổng số',
 }
+
+export const getStatusBadge = (status: string) => {
+  switch(status.toLowerCase()) {
+    case 'planning':
+    case 'lập kế hoạch':
+      return <Badge className="!bg-purple-500/80 text-white">Lập kế hoạch</Badge>;
+    case 'in-progress':
+    case 'đang tiến hành':
+      return <Badge className="!bg-green-500/80 text-white">Đang tiến hành</Badge>;
+    case 'active':
+    case 'ongoing':
+    case 'đang diễn ra':
+      return <Badge className="!bg-green-500/80 text-white">Đang diễn ra</Badge>;
+    case 'completed':
+    case 'hoàn thành':
+      return <Badge className="!bg-blue-500/80 text-white">Hoàn thành</Badge>;
+    case 'on-hold':
+    case 'tạm hoãn':
+      return <Badge className="!bg-orange-500/80 text-white">Tạm hoãn</Badge>;
+    case 'pending':
+    case 'chờ xử lý':
+      return <Badge className="!bg-yellow-500/80 text-white">Chờ xử lý</Badge>;
+    case 'cancelled':
+    case 'đã hủy':
+      return <Badge className="!bg-red-500/80 text-white">Đã hủy</Badge>;
+    default:
+      return <Badge>{status}</Badge>;
+  }
+};

@@ -30,11 +30,6 @@ export const dashboardMenuItems: MenuItem[] = [
         name: 'Tạo dự án mới',
         path: '/dashboard/projects/create',
       },
-      {
-        id: 'projects-members',
-        name: 'Quản lý thành viên',
-        path: '/dashboard/projects/members',
-      },
     ],
   },
   {
