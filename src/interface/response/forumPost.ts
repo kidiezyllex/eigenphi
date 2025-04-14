@@ -52,6 +52,7 @@ export interface IForumPostResponse {
   success: boolean;
   message: string;
   data: IForumPost;
+  status: boolean;
 }
 
 export interface IForumPostsListResponse {

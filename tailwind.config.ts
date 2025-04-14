@@ -22,9 +22,11 @@ const config: Config = {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Amazon Ember',
+  				'var(--font-manrope)',
+                    'Amazon Ember',
                     ...fontFamily.sans
-                ]
+                ],
+                manrope: ['var(--font-manrope)']
   		},
   		fontWeight: {
   			thin: '100',

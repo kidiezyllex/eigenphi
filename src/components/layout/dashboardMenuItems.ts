@@ -60,29 +60,29 @@ export const dashboardMenuItems: MenuItem[] = [
       },
     ],
   },
-  {
-    id: 'task',
-    name: 'Nhiệm vụ thiết kế',
-    path: '/dashboard/tasks',
-    icon: mdiClipboardListOutline,
-    subMenu: [
-      {
-        id: 'task-list',
-        name: 'Danh sách nhiệm vụ',
-        path: '/dashboard/tasks',
-      },
-      {
-        id: 'task-create',
-        name: 'Tạo nhiệm vụ mới',
-        path: '/dashboard/tasks/create',
-      },
-      {
-        id: 'task-my',
-        name: 'Nhiệm vụ của tôi',
-        path: '/dashboard/tasks/my-tasks',
-      },
-    ],
-  },
+  // {
+  //   id: 'task',
+  //   name: 'Nhiệm vụ thiết kế',
+  //   path: '/dashboard/tasks',
+  //   icon: mdiClipboardListOutline,
+  //   subMenu: [
+  //     {
+  //       id: 'task-list',
+  //       name: 'Danh sách nhiệm vụ',
+  //       path: '/dashboard/tasks',
+  //     },
+  //     {
+  //       id: 'task-create',
+  //       name: 'Tạo nhiệm vụ mới',
+  //       path: '/dashboard/tasks/create',
+  //     },
+  //     {
+  //       id: 'task-my',
+  //       name: 'Nhiệm vụ của tôi',
+  //       path: '/dashboard/tasks/my-tasks',
+  //     },
+  //   ],
+  // },
   {
     id: 'forum',
     name: 'Thảo luận dự án',

@@ -8,6 +8,14 @@ import { ReactQueryClientProvider } from '@/provider/ReactQueryClientProvider';
 import { UserProvider } from '@/context/useUserContext';
 import "flag-icons/css/flag-icons.min.css";
 import "@fortawesome/fontawesome-svg-core/styles.css"; 
+import { Manrope } from 'next/font/google';
+
+const manrope = Manrope({
+  subsets: ['latin', 'vietnamese'],
+  display: 'swap',
+  variable: '--font-manrope',
+});
+
 export const metadata: Metadata = {
   title: 'WidoFile',
   description: 'WidoFile - Hệ thống quản lý tài liệu thiết kế game',
@@ -23,7 +31,7 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="vi" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning className={manrope.className}>
       <body className="bg-background min-h-screen">
         <ReactQueryClientProvider>
           <UserProvider>

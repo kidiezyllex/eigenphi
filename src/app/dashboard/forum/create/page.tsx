@@ -163,7 +163,7 @@ export default function CreateForumPostPage() {
       
       const response = await createForumPost.mutateAsync(createData);
 
-      if (!response || !response.success) {
+      if (!response || !response.status) {
         throw new Error("Không thể tạo bài viết mới");
       }
 
@@ -171,8 +171,8 @@ export default function CreateForumPostPage() {
         description: "Đã tạo bài viết mới thành công",
       });
 
-      // Chuyển hướng đến trang chi tiết bài viết
-      router.push(`/dashboard/forum/posts/${response.data._id}`);
+      // Chuyển hướng đến trang danh sách bài viết
+      router.push('/dashboard/forum/posts');
     } catch (error: any) {
       toast.error("Lỗi", {
         description: error.message || "Đã xảy ra lỗi khi xử lý bài viết",

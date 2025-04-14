@@ -52,6 +52,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
   const [deletePostId, setDeletePostId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [userAvatars, setUserAvatars] = useState<{ [userId: string]: number }>({});
   
   const params: any = {};
   if (projectId) {
@@ -63,6 +64,33 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
   
   const { data, isLoading, error } = useGetForumPosts(params);
   const deleteForumPost = useDeleteForumPost();
+
+  // Lấy avatar ngẫu nhiên cho user
+  const getRandomAvatar = (userId: string) => {
+    if (userAvatars[userId]) {
+      return userAvatars[userId];
+    }
+    return 1;
+  };
+
+  // Khởi tạo avatar ngẫu nhiên cho tất cả các tác giả
+  useEffect(() => {
+    if (data?.data) {
+      const newAvatars = { ...userAvatars };
+      let hasChanges = false;
+
+      data.data.forEach((post: any) => {
+        if (post.author && post.author._id && !newAvatars[post.author._id]) {
+          newAvatars[post.author._id] = Math.floor(Math.random() * 4) + 1;
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        setUserAvatars(newAvatars);
+      }
+    }
+  }, [data?.data]);
 
   useEffect(() => {
     if (!data?.data) return;
@@ -179,7 +207,7 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
       </div>
 
       {filteredPosts.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed">
+        <div className="text-center py-12 bg-white rounded-lg border border-dashed">
           <Icon path={mdiComment} size={3} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-500">Không có bài viết nào</h3>
           <p className="text-sm text-gray-400 mt-1">
@@ -209,77 +237,108 @@ export default function ForumPostList({ projectId, isMyPosts = false }: ForumPos
           {filteredPosts.map((post) => (
             <motion.div key={post._id} variants={item}>
               <Link href={`/dashboard/forum/posts/${post._id}`}>
-                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between">
-                      <Badge 
-                        variant="outline" 
-                        className="mb-2 bg-[#E9F3EB] text-[#2C8B3D] border-[#2C8B3D]/20"
+                <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-none relative group bg-gradient-to-br from-white via-[#f7fcf8] to-[#e6f3e9] before:absolute before:inset-0 before:bg-gradient-to-tr before:from-[#e1f5e4]/30 before:to-[#c7e9ce]/5 before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-500 border">
+                  {/* Dải ribbon cho badge */}
+                  <div className="absolute top-4 left-0">
+                    <Badge 
+                      variant="outline" 
+                      className="rounded-r-full rounded-l-none py-1.5 px-4 bg-[#E9F3EB] text-[#2C8B3D] border-[#2C8B3D]/20 font-medium shadow-sm group-hover:bg-[#2C8B3D] group-hover:text-white transition-colors duration-300"
+                    >
+                      {post.project?.name || 'Chung'}
+                    </Badge>
+                  </div>
+                  
+                  {/* Menu tùy chọn */}
+                  {(post as any).isAuthor && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white">
+                            <Icon path={mdiDotsVertical} size={0.7} />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={(e) => {
+                            e.preventDefault();
+                            router.push(`/dashboard/forum/edit/${post._id}`);
+                          }} className="flex items-center">
+                            <Icon path={mdiPencil} size={0.7} className="mr-2 text-[#2C8B3D]" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="flex items-center text-red-600"
+                            onClick={(e) => openDeleteDialog(e, post._id)}
+                          >
+                            <Icon path={mdiDelete} size={0.7} className="mr-2" />
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                  
+                  <div className="pt-14 px-5"> {/* Padding top để tránh badge */}
+                    <CardTitle className="text-xl font-bold text-[#333] group-hover:text-[#2C8B3D] transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
+                      {post.title}
+                    </CardTitle>
+                    
+                    <CardContent className="px-0 py-4">
+                      <p className="text-gray-600 line-clamp-3 min-h-[4.5rem]">
+                        {truncateContent(post.content)}
+                      </p>
+                    </CardContent>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center text-[#2C8B3D] bg-[#E9F3EB] px-2 py-1 rounded-full">
+                          <Icon path={mdiEye} size={0.7} className="mr-1" />
+                          <span className="text-sm font-medium">{post.viewCount || 0}</span>
+                        </div>
+                        <div className="flex items-center text-[#2C8B3D] bg-[#E9F3EB] px-2 py-1 rounded-full">
+                          <Icon path={mdiComment} size={0.7} className="mr-1" />
+                          <span className="text-sm font-medium">{post.commentCount || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <CardFooter className="p-0 pb-4 pt-3 border-t border-green-100 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="relative p-[2px] h-10 w-10 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 flex items-center justify-center">
+                          <div className="p-[2px] bg-white rounded-full">
+                            <Avatar className="!h-8 !w-8 flex-shrink-0">
+                              {post.author?.avatar ? (
+                                <AvatarImage src={post.author?.avatar} alt={post.author?.fullName} />
+                              ) : (
+                                <AvatarImage 
+                                  src={`/images/dfavatar${getRandomAvatar(post.author?._id)}.png`} 
+                                  alt={post.author?.fullName} 
+                                />
+                              )}
+                              <AvatarFallback className="bg-primary/10 text-primary">
+                                {post.author?.fullName?.substring(0, 2).toUpperCase() || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                        </div>
+                        <div className="ml-2">
+                          <div className="text-sm font-semibold">
+                            {post.author?.fullName || 'Người dùng'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {formatDate(post.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <motion.div 
+                        className="bg-[#2C8B3D]/0 group-hover:bg-[#2C8B3D] w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300"
+                        whileHover={{ scale: 1.1 }}
                       >
-                        {post.project?.name || 'Chung'}
-                      </Badge>
-                      {(post as any).isAuthor && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <Icon path={mdiDotsVertical} size={0.7} />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.preventDefault();
-                              router.push(`/dashboard/forum/edit/${post._id}`);
-                            }}>
-                              <Icon path={mdiPencil} size={0.7} className="mr-2" />
-                              Chỉnh sửa
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={(e) => openDeleteDialog(e, post._id)}
-                            >
-                              <Icon path={mdiDelete} size={0.7} className="mr-2" />
-                              Xóa
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
-                    <CardTitle className="text-lg font-semibold">{post.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 line-clamp-3">
-                      {truncateContent(post.content)}
-                    </p>
-                  </CardContent>
-                  <CardFooter className="pt-3 border-t flex flex-col items-start">
-                    <div className="flex items-center w-full justify-between mb-3">
-                      <div className="flex items-center text-gray-500 text-sm gap-4">
-                        <div className="flex items-center">
-                          <Icon path={mdiEye} size={0.7} className="mr-1.5" />
-                          <span>{post.viewCount || 0}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Icon path={mdiComment} size={0.7} className="mr-1.5" />
-                          <span>{post.commentCount || 0}</span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {formatDate(post.createdAt)}
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <Avatar className="h-7 w-7 mr-2">
-                        <AvatarImage src={post.author?.avatar || ''} />
-                        <AvatarFallback>
-                          {post.author?.fullName?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="text-sm font-medium">
-                        {post.author?.fullName || 'Người dùng'}
-                      </div>
-                    </div>
-                  </CardFooter>
+                        <Icon path={mdiEye} size={0.6} className="text-[#2C8B3D] group-hover:text-white" />
+                      </motion.div>
+                    </CardFooter>
+                  </div>
                 </Card>
               </Link>
             </motion.div>
