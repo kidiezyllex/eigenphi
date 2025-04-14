@@ -7,7 +7,6 @@ import { mdiUpload } from '@mdi/js';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -44,14 +43,24 @@ export default function DocumentUploadButton({
           isShared: data.data.document.isShared || type !== 'personal',
         };
 
-        uploadDocument.mutate(documentData);
-
-        toast.success("Thành công", {
-          description: "Đã tải lên tài liệu thành công"
+        uploadDocument.mutate(documentData, {
+          onSuccess: () => {
+            toast.success("Thành công", {
+              description: "Đã tải lên tài liệu thành công"
+            });
+            // Đóng dialog
+            setIsOpen(false);
+          },
+          onError: (error: any) => {
+            toast.error("Lỗi", {
+              description: error.message || "Đã xảy ra lỗi khi lưu thông tin tài liệu"
+            });
+          }
         });
-
-        // Đóng dialog
-        setIsOpen(false);
+      } else {
+        toast.error("Lỗi", {
+          description: "Không thể tải lên tài liệu, vui lòng thử lại"
+        });
       }
     } catch (error: any) {
       toast.error("Lỗi", {
@@ -78,10 +87,7 @@ export default function DocumentUploadButton({
         <ScrollArea className="max-h-[80vh]">
           <div className="p-6">
             <DialogHeader className="pb-4">
-              <DialogTitle>Tải lên tài liệu mới</DialogTitle>
-              <DialogDescription>
-                Điền thông tin và tải lên tài liệu của bạn vào hệ thống.
-              </DialogDescription>
+              <DialogTitle className='text-maintext'>Tải lên tài liệu mới</DialogTitle>
             </DialogHeader>
             <FileUpload 
               onUploadSuccess={handleUploadSuccess}

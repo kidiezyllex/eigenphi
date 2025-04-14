@@ -3,6 +3,11 @@ import { useUpload } from '@/hooks/useUpload';
 import { useGetDocumentCategories } from '@/hooks/useDocumentCategory';
 import { createFileFormData, formatFileSize } from '@/utils/cloudinary';
 import { IUploadResponse } from '@/interface/response/upload';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Button } from '../ui/button';
+import { toast } from 'sonner';
 
 interface FileUploadProps {
   onUploadSuccess?: (data: IUploadResponse) => void;
@@ -50,7 +55,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
     e.preventDefault();
     
     if (!file || !title || !category) {
-      alert('Vui lòng điền các thông tin bắt buộc: File, Tiêu đề và Danh mục');
+      toast.error('Vui lòng điền các thông tin bắt buộc: File, Tiêu đề và Danh mục');
       return;
     }
     
@@ -70,7 +75,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
       tags: tags.length > 0 ? tags : undefined
     })
       .then((data: IUploadResponse) => {
-        // Reset form
         setFile(null);
         setTitle('');
         setDescription('');
@@ -122,11 +126,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
         <label className="block text-sm font-medium mb-1">
           Tiêu đề <span className="text-red-500">*</span>
         </label>
-        <input
+        <Input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 bg-white focus:border-primary focus:ring-primary"
           required
         />
       </div>
@@ -135,10 +139,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
         <label className="block text-sm font-medium mb-1">
           Mô tả
         </label>
-        <textarea
+        <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 focus:border-primary focus:ring-primary"
           rows={3}
         />
       </div>
@@ -147,35 +151,34 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
         <label className="block text-sm font-medium mb-1">
           Danh mục <span className="text-red-500">*</span>
         </label>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        >
-          <option value="">Chọn danh mục</option>
-          {!isCategoriesLoading && categoriesData?.data.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+        <Select value={category} onValueChange={(value) => setCategory(value)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Chọn danh mục" />
+          </SelectTrigger>
+          <SelectContent>
+            {!isCategoriesLoading && categoriesData?.data.map((cat) => (
+              <SelectItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
         <label className="block text-sm font-medium mb-1">Tags</label>
         <div className="flex">
-          <input
+          <Input
             type="text"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
-            className="w-full p-2 border rounded-l"
+            className="w-full p-2 mr-2 bg-white focus:border-primary focus:ring-primary"
             placeholder="Nhập tag và nhấn Thêm"
           />
           <button
             type="button"
             onClick={handleAddTag}
-            className="bg-gray-200 px-4 rounded-r hover:bg-gray-300"
+            className="bg-gray-200 px-4 rounded-sm hover:bg-gray-300"
           >
             Thêm
           </button>
@@ -214,15 +217,18 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
           Công khai cho tất cả người dùng
         </label>
       </div>
-      
-      <button
+      <div className='flex justify-end'>
+      <Button
+        variant="default"
         type="submit"
         disabled={isPending}
-        className={`w-full py-2 rounded-lg text-white 
-          ${isPending ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+        className={`w-24 text-white 
+          ${isPending ? 'bg-gray-400 cursor-not-allowed' : ''}`}
       >
         {isPending ? 'Đang tải lên...' : 'Tải lên'}
-      </button>
+      </Button>
+      </div>
+     
     </form>
   );
 };

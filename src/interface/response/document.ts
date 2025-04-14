@@ -50,6 +50,7 @@ export interface IDocument {
   comments?: IComment[];
   createdAt: string;
   updatedAt: string;
+  fileUrl: string;
 }
 
 export interface IDocumentResponse {
