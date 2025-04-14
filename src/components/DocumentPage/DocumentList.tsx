@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useGetDocuments, useDeleteDocument } from '@/hooks/useDocument';
+import { useGetDocuments, useDeleteDocument, useShareDocument } from '@/hooks/useDocument';
 import { useGetDocumentCategories } from '@/hooks/useDocumentCategory';
+import { useGetUsers } from '@/hooks/useUser';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ import {
   mdiFileDocument,
   mdiEye,
   mdiTrashCanOutline,
+  mdiShieldAccount,
+  mdiEmail,
 } from '@mdi/js';
 import { Input } from '@/components/ui/input';
 import {
@@ -68,6 +71,11 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
   const [filteredDocuments, setFilteredDocuments] = useState<IDocument[]>([]);
   const [viewDocument, setViewDocument] = useState<IDocument | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string>('');
+  const [shareEmail, setShareEmail] = useState<string>('');
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [selectedUserName, setSelectedUserName] = useState<string>('');
   
   const params: any = {};
   if (type === 'personal') {
@@ -80,7 +88,9 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
   
   const { data: documentsData, isLoading: isLoadingDocuments, error: documentsError } = useGetDocuments(params);
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetDocumentCategories();
+  const { data: usersData, isLoading: isLoadingUsers } = useGetUsers();
   const { mutate: deleteDocument } = useDeleteDocument();
+  const { mutate: shareDocument, isPending: isSharing } = useShareDocument();
 
   // Định nghĩa các loại file phổ biến
   const fileTypes = [
@@ -240,9 +250,41 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     }
   };
 
+  // Tìm tên người dùng theo ID
+  const findUserNameById = (userId: string) => {
+    const user = usersData?.data.find(user => user._id === userId);
+    return user ? user.fullName : '';
+  };
+
   // Xử lý chia sẻ
   const handleShare = (docId: string) => {
-    toast.info('Chức năng chia sẻ đang được phát triển');
+    setSelectedDocumentId(docId);
+    setSelectedUserId('');
+    setSelectedUserName('');
+    setShareDialogOpen(true);
+  };
+  
+  const handleShareSubmit = () => {
+    if (!selectedUserId || !selectedDocumentId) {
+      toast.error('Vui lòng chọn người dùng');
+      return;
+    }
+    
+    shareDocument(
+      { 
+        id: selectedDocumentId, 
+        payload: { userIds: [selectedUserId] } 
+      },
+      {
+        onSuccess: () => {
+          toast.success('Đã chia sẻ tài liệu thành công');
+          setShareDialogOpen(false);
+        },
+        onError: (error: any) => {
+          toast.error(error.message || 'Không thể chia sẻ tài liệu');
+        }
+      }
+    );
   };
 
   // Xử lý xem chi tiết
@@ -357,7 +399,7 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     }
   };
 
-  if (isLoadingDocuments || isLoadingCategories) {
+  if (isLoadingDocuments || isLoadingCategories || isLoadingUsers) {
     return (
       <div>
         <div className="flex relative flex-1 max-w-md mb-4">
@@ -666,6 +708,85 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog chia sẻ tài liệu */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ tài liệu</DialogTitle>
+            <div className="text-sm text-gray-500 mt-1">
+              Chọn người dùng bạn muốn chia sẻ tài liệu này
+            </div>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Người dùng
+              </label>
+              <Select
+                value={selectedUserId}
+                onValueChange={(value) => {
+                  setSelectedUserId(value);
+                  setSelectedUserName(findUserNameById(value));
+                }}
+              >
+                <SelectTrigger className="bg-white focus:border-primary focus:ring-primary">
+                  <SelectValue placeholder="Chọn người dùng">
+                    {selectedUserName || "Chọn người dùng"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingUsers ? (
+                    <div className="flex items-center justify-center py-2">
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                      <span>Đang tải...</span>
+                    </div>
+                  ) : (
+                    usersData?.data.map((user: any) => (
+                      <SelectItem key={user._id} value={user._id} className="py-2">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-maintext">{user.fullName}</span>
+                          <div className="flex text-xs text-muted-foreground mt-1 items-center">
+                            <Icon path={mdiShieldAccount} size={0.6} className="mr-2 text-gray-400" />
+                            <span className="mr-2">{user.role === 'admin' ? 'Quản trị viên' : 'Nhân viên'}</span>
+                            <Icon path={mdiEmail} size={0.6} className="mr-2 text-gray-400" />
+                            <span>{user.email}</span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShareDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleShareSubmit}
+              disabled={isSharing || !selectedUserId}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {isSharing ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-b-transparent"></div>
+                  Đang chia sẻ...
+                </>
+              ) : (
+                <>
+                  <Icon path={mdiShareVariant} size={0.7} className="mr-2" />
+                  Chia sẻ
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
