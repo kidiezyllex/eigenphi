@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGetDocuments } from '@/hooks/useDocument';
 import DocumentList from '@/components/DocumentPage/DocumentList';
+import DocumentUploadButton from '@/components/DocumentPage/DocumentUploadButton';
 import { Skeleton } from '@/components/ui/skeleton';
 import DocumentDetail from '@/components/DocumentPage/DocumentDetail';
 import {
@@ -15,8 +16,16 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export default function SharedDocumentsPage() {
-  const { data, isLoading, error } = useGetDocuments({ project: "shared" });
+  const { data, isLoading, error } = useGetDocuments({});
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  
+  // Lọc tài liệu có isShared === true
+  const filteredSharedDocuments = useMemo(() => {
+    if (!data?.data) return [];
+    return data.data.filter(doc => doc.isShared === true);
+  }, [data]);
+
+  console.log(filteredSharedDocuments);
 
   if (isLoading) {
     return (
@@ -32,17 +41,18 @@ export default function SharedDocumentsPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-24" />
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         
         <div className="flex justify-between items-center">
           <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-36" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="flex flex-col space-y-3">
               <Skeleton className="h-40 w-full rounded-t-lg" />
               <div className="space-y-2 px-3">
@@ -77,6 +87,13 @@ export default function SharedDocumentsPage() {
     );
   }
 
+  // Chuẩn bị dữ liệu để truyền vào DocumentList
+  const sharedDocumentsData = {
+    data: filteredSharedDocuments,
+    isLoading: isLoading,
+    error: error ? (error as Error) : undefined
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -96,11 +113,13 @@ export default function SharedDocumentsPage() {
       </Breadcrumb>
 
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary">Tài liệu được chia sẻ với tôi</h1>
+        <h1 className="text-2xl font-bold text-primary">Tài liệu được chia sẻ</h1>
+        <DocumentUploadButton type="personal" />
       </div>
 
       <DocumentList 
-        type="shared" 
+        type="shared"
+        data={sharedDocumentsData}
         onViewDocument={(documentId: string) => setSelectedDocumentId(documentId)}
       />
     </div>

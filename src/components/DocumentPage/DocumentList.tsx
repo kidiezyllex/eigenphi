@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useGetDocuments, useDeleteDocument, useShareDocument } from '@/hooks/useDocument';
+import { useDeleteDocument, useGetDocuments, useShareDocument } from '@/hooks/useDocument';
 import { useGetDocumentCategories } from '@/hooks/useDocumentCategory';
 import { useGetUsers } from '@/hooks/useUser';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,12 +59,17 @@ import {
 import { mdiFileOutline, mdiFilterOutline } from '@mdi/js';
 
 interface DocumentListProps {
-  type: 'personal' | 'project' | 'shared';
+  type: 'personal' | 'project' | 'shared' | 'all';
   projectId?: string;
   onViewDocument?: (documentId: string) => void;
+  data?: {
+    data: IDocument[];
+    isLoading?: boolean;
+    error?: Error;
+  };
 }
 
-export default function DocumentList({ type, projectId, onViewDocument }: DocumentListProps) {
+export default function DocumentList({ type, projectId, onViewDocument, data }: DocumentListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedFileType, setSelectedFileType] = useState<string | null>(null);
@@ -84,9 +89,16 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     params.project = projectId;
   } else if (type === 'shared') {
     params.project = "shared";
+  } else if (type === 'all') {
+    // Không cần thêm tham số
   }
   
-  const { data: documentsData, isLoading: isLoadingDocuments, error: documentsError } = useGetDocuments(params);
+  const { 
+    data: documentsData, 
+    isLoading: isLoadingDocuments, 
+    error: documentsError 
+  } = useGetDocuments(data ? undefined : params);
+
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetDocumentCategories();
   const { data: usersData, isLoading: isLoadingUsers } = useGetUsers();
   const { mutate: deleteDocument } = useDeleteDocument();
@@ -112,9 +124,11 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
   };
 
   useEffect(() => {
-    if (!documentsData?.data) return;
+    // Sử dụng data từ prop hoặc từ useGetDocuments
+    const documents = data?.data || documentsData?.data;
+    if (!documents) return;
     
-    let filtered = [...documentsData.data];
+    let filtered = [...documents];
     
     // Lọc theo danh mục  
     if (selectedCategory) {
@@ -147,7 +161,7 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     }
     
     setFilteredDocuments(filtered);
-  }, [documentsData, selectedCategory, selectedFileType, searchQuery]);
+  }, [documentsData, data, selectedCategory, selectedFileType, searchQuery]);
 
   // Xác định icon cho từng loại file
   const getFileIcon = (fileType: string) => {
@@ -399,7 +413,7 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     }
   };
 
-  if (isLoadingDocuments || isLoadingCategories || isLoadingUsers) {
+  if (data?.isLoading || isLoadingDocuments || isLoadingCategories || isLoadingUsers) {
     return (
       <div>
         <div className="flex relative flex-1 max-w-md mb-4">
@@ -433,17 +447,10 @@ export default function DocumentList({ type, projectId, onViewDocument }: Docume
     );
   }
 
-  if (documentsError) {
-    return <div className="text-red-500 p-4">{(documentsError as Error).message}</div>;
+  if (data?.error || documentsError) {
+    return <div className="text-red-500 p-4">{((data?.error || documentsError) as Error).message}</div>;
   }
 
-  const titleMap = {
-    personal: 'Tài liệu cá nhân',
-    project: 'Tài liệu dự án',
-    shared: 'Tài liệu được chia sẻ'
-  };
-
-  // Animation variants
   const container = {
     hidden: { opacity: 0 },
     show: {

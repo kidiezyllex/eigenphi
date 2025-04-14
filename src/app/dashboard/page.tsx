@@ -117,7 +117,7 @@ export default function DashboardPage() {
   const cards = [
     {
       title: "Tài liệu của tôi",
-      description: "Quản lý tài liệu cá nhân và dự án",
+      description: "Quản lý tài liệu và dự án",
       icon: mdiFileDocument,
       link: "/dashboard/documents",
       color: "bg-[#2C8B3D]/10",

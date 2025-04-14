@@ -108,7 +108,7 @@ export default function ProjectDocumentsPage() {
           value={selectedProjectId} 
           onValueChange={handleProjectChange}
         >
-          <SelectTrigger className="w-full max-w-xs">
+          <SelectTrigger className="w-full max-w-xs bg-white">
             <SelectValue placeholder="Chọn dự án" />
           </SelectTrigger>
           <SelectContent>
@@ -130,7 +130,7 @@ export default function ProjectDocumentsPage() {
       </div>
 
       {!selectedProjectId ? (
-        <div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed">
+        <div className="text-center py-12 bg-white rounded-lg border border-dashed">
           <h3 className="text-lg font-medium text-muted-foreground">Vui lòng chọn dự án</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Chọn một dự án từ danh sách để xem tài liệu

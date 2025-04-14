@@ -162,13 +162,13 @@ export default function DocumentsPage() {
       <h1 className="text-2xl font-bold text-primary">Quản lý tài liệu</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link href="/dashboard/documents/personal">
+        <Link href="/dashboard/documents/list">
           <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
             <CardContent className="p-6 flex flex-col items-center text-center">
               <div className="p-3 bg-primary/10 rounded-full mb-4">
                 <Icon path={mdiFileDocumentOutline} size={1.5} className="text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-1 text-maintext">Tài liệu cá nhân</h3>
+              <h3 className="text-lg font-medium mb-1 text-maintext">Tất cả tài liệu</h3>
               <p className="text-muted-foreground text-sm mb-4">Quản lý tài liệu cá nhân của bạn</p>
               <div className="mt-auto">
                 <Badge className="font-medium">
@@ -220,7 +220,7 @@ export default function DocumentsPage() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-medium text-maintext">Tài liệu gần đây</h3>
               <Button variant="link" asChild>
-                <Link href="/dashboard/documents/personal" className="text-primary">
+                <Link href="/dashboard/documents/list" className="text-primary">
                   Xem tất cả
                   <Icon path={mdiChevronRight} size={0.6} className="ml-1" />
                 </Link>

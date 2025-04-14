@@ -40,8 +40,8 @@ export const dashboardMenuItems: MenuItem[] = [
     subMenu: [
       {
         id: 'document-personal',
-        name: 'Tài liệu cá nhân',
-        path: '/dashboard/documents/personal',
+        name: 'Tất cả tài liệu',
+        path: '/dashboard/documents/list',
       },
       {
         id: 'document-project',
@@ -109,12 +109,6 @@ export const adminMenuItems: MenuItem[] = [
         path: '/dashboard/admin/users/create',
       },
     ],
-  },
-  {
-    id: 'document-categories',
-    name: 'Phân loại tài liệu',
-    path: '/dashboard/admin/document-categories',
-    icon: mdiFileDocumentMultipleOutline,
   },
   {
     id: 'statistics',

@@ -14,8 +14,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export default function PersonalDocumentsPage() {
-  const { data, isLoading, error } = useGetDocuments({ project: undefined });
+export default function AllDocumentsPage() {
+  const { data, isLoading, error } = useGetDocuments();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
   if (isLoading) {
@@ -69,6 +69,13 @@ export default function PersonalDocumentsPage() {
     );
   }
 
+  // Chuẩn bị dữ liệu để truyền vào DocumentList
+  const allDocumentsData = {
+    data: data?.data || [],
+    isLoading: isLoading,
+    error: error ? (error as Error) : undefined
+  };
+
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -82,17 +89,21 @@ export default function PersonalDocumentsPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-semibold !text-maintext">Tài liệu cá nhân</BreadcrumbPage>
+            <BreadcrumbPage className="font-semibold !text-maintext">Tất cả tài liệu</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-primary">Tài liệu cá nhân</h1>
+        <h1 className="text-2xl font-bold text-primary">Tất cả tài liệu</h1>
         <DocumentUploadButton type="personal" />
       </div>
 
-      <DocumentList type="personal" />
+      <DocumentList 
+        type="all" 
+        data={allDocumentsData}
+        onViewDocument={(documentId: string) => setSelectedDocumentId(documentId)}
+      />
     </div>
   );
 } 
