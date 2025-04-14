@@ -136,7 +136,7 @@ export const HomePage = () => {
                                         transition={{ delay: 0.5, duration: 0.5 }}
                                         className="slogan text-sm xl:text-base mt-1"
                                     >
-                                        Ứng dụng quản lý tài liệu thiết kế game và quản lý dự án của chúng tôi.
+                                        Ứng dụng quản lý tài liệu thiết kế game.
                                     </motion.i>
                                 </div>
                             </div>
