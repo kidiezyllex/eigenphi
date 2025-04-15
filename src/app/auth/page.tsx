@@ -194,7 +194,7 @@ export default function AuthPage() {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="mb-4 text-3xl font-semibold text-gray-900 dark:text-gray-100"
           >
-            Quản lý dự án game chuyên nghiệp
+            Hệ thống quản lý tài liệu thiết kế game
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: -5 }}
@@ -202,8 +202,7 @@ export default function AuthPage() {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="mb-8 text-lg text-gray-600 dark:text-gray-300"
           >
-            Nền tảng quản lý tài liệu và quy trình làm việc cho các đội ngũ phát triển game. Thiết kế đặc biệt cho quy
-            trình làm việc trên nhiều vai trò khác nhau.
+            Nền tảng quản lý tài liệu chuyên biệt cho các đội ngũ phát triển game. Hỗ trợ lưu trữ, tìm kiếm, chia sẻ và thảo luận tài liệu trong các dự án.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -212,20 +211,20 @@ export default function AuthPage() {
             className="grid grid-cols-2 gap-4 mb-8"
           >
             <div className="p-4 bg-white/80 dark:bg-gray-700/80 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-              <h3 className="font-semibold text-primary dark:text-primary">Quản lý tài liệu</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Lưu trữ, phiên bản, và duyệt tài liệu dự án</p>
+              <h3 className="font-semibold text-primary dark:text-primary">Lưu trữ & chia sẻ</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Tài liệu được lưu trữ an toàn và chia sẻ tài liệu nội bộ</p>
             </div>
             <div className="p-4 bg-white/80 dark:bg-gray-700/80 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-              <h3 className="font-semibold text-primary dark:text-primary">Phân vai trò</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Phân quyền chi tiết cho từng vai trò trong đội</p>
+              <h3 className="font-semibold text-primary dark:text-primary">Tìm kiếm thông minh</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Tìm kiếm nhanh theo tên tài liệu, từ khóa hoặc bộ lọc</p>
             </div>
             <div className="p-4 bg-white/80 dark:bg-gray-700/80 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-              <h3 className="font-semibold text-primary dark:text-primary">Theo dõi tiến độ</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Giám sát trạng thái và tiến độ dự án</p>
+              <h3 className="font-semibold text-primary dark:text-primary">Diễn đàn thảo luận</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Thảo luận và chia sẻ kinh nghiệm</p>
             </div>
             <div className="p-4 bg-white/80 dark:bg-gray-700/80 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:translate-y-[-2px]">
-              <h3 className="font-semibold text-primary dark:text-primary">Quy trình kiểm thử</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Quản lý test case và báo cáo lỗi</p>
+              <h3 className="font-semibold text-primary dark:text-primary">Phân quyền người dùng</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Kiểm soát quyền truy cập và chỉnh sửa theo vai trò</p>
             </div>
           </motion.div>
         </motion.div>
