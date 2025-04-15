@@ -32,7 +32,7 @@ import {
 } from '@mdi/js';
 import { toast } from 'sonner';
 import { IUpdateForumPost } from '@/interface/request/forumPost';
-import { useUpload } from '@/hooks/useUpload';
+import { useUpload } from '@/hooks/useDocumentCategory';
 
 interface IAttachment {
   _id: string;

@@ -26,16 +26,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -56,7 +46,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { useUpload } from '@/hooks/useUpload';
+import { useUpload } from '@/hooks/useDocumentCategory';
 import Image from 'next/image';
 
 export default function DocumentCategoriesPage() {
@@ -699,27 +689,38 @@ export default function DocumentCategoriesPage() {
       </Dialog>
 
       {/* Dialog xác nhận xóa danh mục */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xóa danh mục</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}"? 
-              Thao tác này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteCategory.isPending}>Hủy</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteCategory}
-              className="bg-rose-600 hover:bg-rose-700 text-white"
-              disabled={deleteCategory.isPending}
-            >
-              {deleteCategory.isPending ? 'Đang xử lý...' : 'Xóa danh mục'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-6">
+              <DialogHeader className="pb-4">
+                <DialogTitle>Xóa danh mục</DialogTitle>
+                <DialogDescription>
+                  Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}"? 
+                  Thao tác này không thể hoàn tác.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <DialogFooter className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                  disabled={deleteCategory.isPending}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="bg-rose-600 hover:bg-rose-700 text-white"
+                  onClick={handleDeleteCategory}
+                  disabled={deleteCategory.isPending}
+                >
+                  {deleteCategory.isPending ? 'Đang xử lý...' : 'Xóa danh mục'}
+                </Button>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

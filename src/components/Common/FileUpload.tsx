@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useUpload } from '@/hooks/useUpload';
+import { useUpload } from '@/hooks/useDocumentCategory';
 import { useGetDocumentCategories } from '@/hooks/useDocumentCategory';
 import { createFileFormData, formatFileSize } from '@/utils/cloudinary';
 import { IUploadResponse } from '@/interface/response/upload';
@@ -10,11 +10,10 @@ import { Button } from '../ui/button';
 import { toast } from 'sonner';
 
 interface FileUploadProps {
-  onUploadSuccess?: (data: IUploadResponse) => void;
-  onUploadError?: (error: Error) => void;
+  onSuccess?: () => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError }) => {
+const FileUpload = ({ onSuccess }: FileUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -32,8 +31,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-      
-      // Auto-fill title with filename if empty
       if (!title) {
         setTitle(selectedFile.name.split('.')[0]);
       }
@@ -59,14 +56,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
       return;
     }
     
-    const formData = createFileFormData(file, {
-      title,
-      description,
-      category,
-      isShared,
-      tags: tags.length > 0 ? tags : undefined
-    });
-    
     uploadFile(file, {
       title,
       description,
@@ -75,25 +64,27 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess, onUploadError 
       tags: tags.length > 0 ? tags : undefined
     })
       .then((data: IUploadResponse) => {
-        setFile(null);
-        setTitle('');
-        setDescription('');
-        setCategory('');
-        setIsShared(false);
-        setTags([]);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-        
-        // Callback
-        if (onUploadSuccess) {
-          onUploadSuccess(data);
+        if (data.status) {
+          toast.success(data.message || 'Tải tài liệu lên thành công');
+          setFile(null);
+          setTitle('');
+          setDescription('');
+          setCategory('');
+          setIsShared(false);
+          setTags([]);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+          if (onSuccess) {
+            onSuccess();
+          }
+        } else {
+          toast.error(data.message || 'Có lỗi xảy ra khi tải tài liệu');
         }
       })
-      .catch((error: Error) => {
-        if (onUploadError) {
-          onUploadError(error);
-        }
+      .catch((error) => {
+        console.error('Error uploading file:', error);
+        toast.error(error?.message || 'Có lỗi xảy ra khi tải tài liệu');
       });
   };
 

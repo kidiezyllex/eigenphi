@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { useCreateForumPost, useUpdateForumPost, useGetForumPostById } from '@/hooks/useForumPost';
 import { useGetProjects } from '@/hooks/useProject';
-import { useUpload } from '@/hooks/useUpload';
+import { useUpload } from '@/hooks/useDocumentCategory';
 import { toast } from 'sonner';
 import { Icon } from '@mdi/react';
 import { 
@@ -160,7 +160,7 @@ export default function ForumPostForm({ postId, isEdit = false }: ForumPostFormP
         if (!attachment.file) continue;
         
         const uploadResponse = await uploadFile(attachment.file);
-        if (!uploadResponse || !uploadResponse.success) {
+        if (!uploadResponse || !uploadResponse.status) {
           throw new Error("Không thể tải file đính kèm lên hệ thống");
         }
         

@@ -31,16 +31,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -620,26 +610,36 @@ export default function UsersPage() {
       </Dialog>
 
       {/* Dialog xác nhận xóa người dùng */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa người dùng?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Hành động này không thể khôi phục. Việc xóa người dùng sẽ xóa tất cả dữ liệu liên quan
-              và xóa quyền truy cập của họ vào hệ thống.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteUser}
-              className="bg-red-500 text-white hover:bg-red-600"
-            >
-              {deleteUser.isPending ? 'Đang xử lý...' : 'Xóa người dùng'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-6">
+              <DialogHeader className="pb-4">
+                <DialogTitle>Xác nhận xóa người dùng?</DialogTitle>
+                <DialogDescription>
+                  Hành động này không thể khôi phục. Việc xóa người dùng sẽ xóa tất cả dữ liệu liên quan
+                  và xóa quyền truy cập của họ vào hệ thống.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <DialogFooter className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  onClick={handleDeleteUser}
+                >
+                  {deleteUser.isPending ? 'Đang xử lý...' : 'Xóa người dùng'}
+                </Button>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog phân quyền */}
       <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>

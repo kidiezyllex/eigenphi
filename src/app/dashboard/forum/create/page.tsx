@@ -42,7 +42,7 @@ import {
 } from '@mdi/js';
 import { toast } from 'sonner';
 import { ICreateForumPost } from '@/interface/request/forumPost';
-import { useUpload } from '@/hooks/useUpload';
+import { useUpload } from '@/hooks/useDocumentCategory';
 
 interface AttachmentFile {
   file?: File;

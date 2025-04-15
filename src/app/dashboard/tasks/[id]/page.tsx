@@ -10,16 +10,6 @@ import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -54,6 +44,15 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils';
 import { getStatusBadge } from '@/utils/constant';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const statusOptions = [
   { value: 'pending', label: 'Chờ xử lý', color: 'bg-yellow-500' },
@@ -652,25 +651,35 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Dialog xác nhận xóa */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa nhiệm vụ</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa nhiệm vụ "{task.title}" không? Hành động này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteTask}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-6">
+              <DialogHeader className="pb-4">
+                <DialogTitle>Xác nhận xóa nhiệm vụ</DialogTitle>
+                <DialogDescription>
+                  Bạn có chắc chắn muốn xóa nhiệm vụ "{task.title}" không? Hành động này không thể hoàn tác.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <DialogFooter className="pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  onClick={handleDeleteTask}
+                >
+                  Xóa
+                </Button>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

@@ -26,6 +26,7 @@ import {
   mdiTrashCanOutline,
   mdiShieldAccount,
   mdiEmail,
+  mdiRefresh,
 } from '@mdi/js';
 import { Input } from '@/components/ui/input';
 import {
@@ -81,6 +82,9 @@ export default function DocumentList({ type, projectId, onViewDocument, data }: 
   const [shareEmail, setShareEmail] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [selectedUserName, setSelectedUserName] = useState<string>('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<{id: string, title: string} | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const params: any = {};
   if (type === 'personal') {
@@ -96,7 +100,8 @@ export default function DocumentList({ type, projectId, onViewDocument, data }: 
   const { 
     data: documentsData, 
     isLoading: isLoadingDocuments, 
-    error: documentsError 
+    error: documentsError,
+    refetch: refetchDocuments
   } = useGetDocuments(data ? undefined : params);
 
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetDocumentCategories();
@@ -401,16 +406,31 @@ export default function DocumentList({ type, projectId, onViewDocument, data }: 
 
   // Xử lý xóa tài liệu
   const handleDeleteDocument = (docId: string, docTitle: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa tài liệu "${docTitle}"?`)) {
-      deleteDocument(docId, {
-        onSuccess: () => {
-          toast.success('Đã xóa tài liệu thành công');
-        },
-        onError: (error: any) => {
-          toast.error(error.message || 'Không thể xóa tài liệu');
-        }
-      });
-    }
+    setDocumentToDelete({id: docId, title: docTitle});
+    setDeleteDialogOpen(true);
+  };
+  
+  const confirmDeleteDocument = () => {
+    if (!documentToDelete) return;
+    
+    deleteDocument(documentToDelete.id, {
+      onSuccess: () => {
+        toast.success('Đã xóa tài liệu thành công');
+        setDeleteDialogOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error(error.message || 'Không thể xóa tài liệu');
+      }
+    });
+  };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    refetchDocuments().finally(() => {
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 800);
+    });
   };
 
   if (data?.isLoading || isLoadingDocuments || isLoadingCategories || isLoadingUsers) {
@@ -483,7 +503,17 @@ export default function DocumentList({ type, projectId, onViewDocument, data }: 
           />
         </div>
         
-        <div className="flex flex-wrap gap-3 md:gap-4 items-center">
+        <div className="flex flex-wrap gap-2 md:gap-2 items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            title="Làm mới tài liệu"
+            className='w-8'
+          >
+            <Icon path={mdiRefresh} size={0.7} className={`text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          
           <div className="w-44">
             <Select value={selectedFileType || "all"} onValueChange={(value) => setSelectedFileType(value === "all" ? null : value)}>
               <SelectTrigger className="bg-white">
@@ -792,6 +822,32 @@ export default function DocumentList({ type, projectId, onViewDocument, data }: 
                   Chia sẻ
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog xác nhận xóa tài liệu */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <div className="text-sm text-gray-500 mt-1">
+              {documentToDelete && `Bạn có chắc chắn muốn xóa tài liệu "${documentToDelete.title}"?`}
+            </div>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={confirmDeleteDocument}
+              variant="destructive"
+            >
+              Xóa tài liệu
             </Button>
           </DialogFooter>
         </DialogContent>

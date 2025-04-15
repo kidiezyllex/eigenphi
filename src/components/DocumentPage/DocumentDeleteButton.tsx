@@ -7,15 +7,15 @@ import { Icon } from '@mdi/react';
 import { mdiDeleteOutline } from '@mdi/js';
 import { toast } from 'sonner';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface DocumentDeleteButtonProps {
   documentId: string;
@@ -64,27 +64,37 @@ export default function DocumentDeleteButton({
         Xóa
       </Button>
 
-      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xóa tài liệu</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa tài liệu "<span className="font-medium">{documentTitle}</span>"? 
-              Thao tác này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              className="bg-red-medium hover:bg-red-medium/90"
-              disabled={deleteDocument.isPending}
-            >
-              {deleteDocument.isPending ? 'Đang xử lý...' : 'Xóa tài liệu'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent>
+          <ScrollArea className="max-h-[80vh]">
+            <div className="p-2">
+              <DialogHeader className="pb-4">
+                <DialogTitle>Xóa tài liệu</DialogTitle>
+                <DialogDescription>
+                  Bạn có chắc chắn muốn xóa tài liệu "<span className="font-medium">{documentTitle}</span>"? 
+                  Thao tác này không thể hoàn tác.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <DialogFooter className="pt-4 gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsConfirmOpen(false)}
+                >
+                  Hủy
+                </Button>
+                <Button 
+                  onClick={handleDelete}
+                  className="bg-red-medium hover:bg-red-medium/90"
+                  disabled={deleteDocument.isPending}
+                >
+                  {deleteDocument.isPending ? 'Đang xử lý...' : 'Xóa tài liệu'}
+                </Button>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </>
   );
 } 
