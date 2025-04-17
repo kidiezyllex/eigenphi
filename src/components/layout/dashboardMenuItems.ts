@@ -112,7 +112,7 @@ export const adminMenuItems: MenuItem[] = [
   },
   {
     id: 'statistics',
-    name: 'Thống kê hệ thống',
+    name: 'Thống kê',
     path: '/dashboard/admin/statistics',
     icon: mdiChartBar,
   },

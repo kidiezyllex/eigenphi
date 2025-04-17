@@ -745,7 +745,7 @@ export default function UsersPage() {
                         <div className="flex items-center justify-between">
                           <div className="space-y-0.5">
                             <Label htmlFor="view-reports" className="text-sm font-medium">Xem báo cáo thống kê</Label>
-                            <p className="text-xs text-gray-500">Truy cập và xem các báo cáo, thống kê hệ thống</p>
+                            <p className="text-xs text-gray-500">Truy cập và xem các báo cáo, </p>
                           </div>
                           <Switch 
                             id="view-reports" 

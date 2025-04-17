@@ -58,6 +58,7 @@
     "react-hook-form": "^7.55.0",
     "react-hot-toast": "^2.5.2",
     "react-slick": "^0.30.3",
+    "recharts": "^2.15.2",
     "sass": "^1.86.1",
     "slick-carousel": "^1.8.1",
     "sonner": "^2.0.3",

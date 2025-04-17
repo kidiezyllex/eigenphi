@@ -313,6 +313,10 @@ export default function DocumentCategoriesPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
+            <BreadcrumbPage>Danh mục tài liệu</BreadcrumbPage>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
             <BreadcrumbPage className="font-semibold !text-maintext">Danh mục tài liệu</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
