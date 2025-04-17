@@ -4,7 +4,7 @@
 
 body {
   color: #373737;
-  font-family: var(--font-manrope);
+  font-family: var(--font-opensans);
 }
 
 html,
@@ -242,14 +242,14 @@ ul.ant-menu.ant-menu-sub.ant-menu-inline {
   }
 
   .text-outline-green {
-    -webkit-text-stroke: 1px #2C8B3D; /* violet-500 for better visibility */
+    -webkit-text-stroke: 1px #2C8B3D; 
     -webkit-text-fill-color: transparent;
     text-stroke: 1px #2C8B3D;
     text-fill-color: transparent;
     color: transparent;
   }
   .text-outline-white {
-    -webkit-text-stroke: 1px #ffffff; /* violet-500 for better visibility */
+    -webkit-text-stroke: 1px #ffffff; 
     -webkit-text-fill-color: transparent;
     text-stroke: 1px #ffffff;
     text-fill-color: transparent;

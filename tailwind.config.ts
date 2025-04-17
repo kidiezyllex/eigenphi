@@ -1,6 +1,5 @@
 import type { Config } from 'tailwindcss';
 const plugin = require('tailwindcss/plugin');
-const { fontFamily } = require('tailwindcss/defaultTheme')
 
 const config: Config = {
     darkMode: ['class'],
@@ -20,14 +19,6 @@ const config: Config = {
   		xxxl: '1920px'
   	},
   	extend: {
-  		fontFamily: {
-  			sans: [
-  				'var(--font-manrope)',
-                    'Amazon Ember',
-                    ...fontFamily.sans
-                ],
-                manrope: ['var(--font-manrope)']
-  		},
   		fontWeight: {
   			thin: '100',
   			light: '300',
@@ -54,31 +45,14 @@ const config: Config = {
   				DEFAULT: '#88C140',
   				foreground: 'hsl(var(--secondary-foreground))'
   			},
-  			background: '#FDFDFD',
-  			extra: '#F2A024',
-  			active: '#F2A024',
+			background: '#1A1B1E',
+  			mainBackgroundV1: '#1A1B1E',
+  			mainDarkBackgroundV1: '#141517',
+			mainGrayV1: '#868E96',
+  			mainActiveV1: '#44D7B6',
+			mainCardV1: '#25262B',
+			mainBorderV1: '#2B2D31',
 			maintext: '#374151',
-  			'main-dark-blue': '#131921',
-  			'main-charcoal-blue': '#232F3E',
-  			'main-gunmetal-blue': '#252C35',
-  			'main-golden-orange': '#FCAF17',
-  			'main-text': '#0F172A',
-  			'gray-light': '#7579E70D',
-  			'gray-dark': '#636364',
-  			'border-primary': '#DCDCDC',
-  			'border-second': '#D9D9D9',
-  			'white-primary': '#ffffff',
-  			'black-dark': '#000000',
-  			'light-black': '#716F7E',
-  			'medium-grey': '#AAAAAA',
-  			'green-medium': '#0D961B',
-  			'red-medium': '#E73D30',
-  			'main-purple': '#691577',
-  			'red-error': '#FF4D4F',
-  			'blue-dark': '#6366F1',
-  			'orange-medium': '#FAAD14',
-  			'blue-medium': '#005884',
-  			'blue-darker': '#1677FF',
   			foreground: 'hsl(var(--foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',

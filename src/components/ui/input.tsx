@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils"
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (
+      // className="pl-10 w-72 h-9 bg-gray-50 focus:border-primary focus:ring-primary"
       <input
         type={type}
         className={cn(
-          "flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-base  transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "flex h-9 w-full rounded-sm bg-mainCardV1 px-3 py-1 text-base transition-colors file:border-0 file:bg-mainCardV1 file:text-sm file:font-medium file:text-foreground focus:outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus:!border-mainActiveV1/50 focus:!ring-mainActiveV1/50 border !border-mainBorderV1",
           className
         )}
         ref={ref}

@@ -32,7 +32,7 @@ const nextConfig = {
     ],
   },
   async rewrites() {
-    const domain = "widofile-be.onrender.com";
+    const domain = "example-be.onrender.com";
     return [
       {
         source: "/api/:path*",
