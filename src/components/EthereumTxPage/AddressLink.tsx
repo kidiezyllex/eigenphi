@@ -4,10 +4,14 @@ interface AddressLinkProps {
   address: string
   isAsset?: boolean
   isHash?: boolean
+  shorten?: boolean
 }
 
-const AddressLink: React.FC<AddressLinkProps> = ({ address, isAsset = false, isHash = false }) => {
-  const shortAddress = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
+const AddressLink: React.FC<AddressLinkProps> = ({ address, isAsset = false, shorten = true }) => {
+  let shortAddress: string = address;
+  if (shorten) {
+    shortAddress = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
+  }
 
   return (
     <a

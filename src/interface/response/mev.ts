@@ -18,6 +18,9 @@ export interface IMevTransaction {
   blockNumber: number;
   index: number;
   traces?: IMevTrace[];
+  frontRun?: IMevTrace[];
+  backRun?: IMevTrace[];
+  victim?: IMevTrace[];
   gasUsed?: string;
   gasPrice?: string;
   timestamp?: string;

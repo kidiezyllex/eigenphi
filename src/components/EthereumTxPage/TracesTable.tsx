@@ -54,7 +54,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="w-[200px] text-xs">Không có dữ liệu traces cho giao dịch này</p>
+                  <p className="w-[200px] text-xs">Cannot find traces of this transaction.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -64,7 +64,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
           </Button>
         </CardHeader>
         <CardContent className="p-6 flex justify-center items-center">
-          <p className="text-gray-400">Không có dữ liệu traces cho giao dịch này</p>
+          <p className="text-gray-400">Cannot find traces of this transaction.</p>
         </CardContent>
       </Card>
     )
@@ -83,7 +83,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="w-[200px] text-xs">Thông tin chi tiết về các token transfer trong giao dịch</p>
+                <p className="w-[200px] text-xs">Transfer Details</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -108,7 +108,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                 <th className="py-2 px-4 text-right text-gray-400 text-xs font-medium">
                   <div className="flex items-center justify-end space-x-1">
                     <Icon path={mdiEthereum} size={0.7} />
-                    <span>ETH</span>
+                    <span>Amount</span>
                   </div>
                 </th>
                 <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium">Asset</th>
@@ -117,7 +117,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     className="flex items-center justify-end space-x-1 w-full cursor-pointer"
                     onClick={handleSort}
                   >
-                    <span>EventLogIndex</span>
+                    <span>Event Log Index</span>
                     <Icon path={mdiUnfoldMoreHorizontal} size={0.7} />
                   </button>
                 </th>
@@ -126,15 +126,12 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
             <tbody>
               {sortedTraces?.map((trace, index) => (
                 <React.Fragment key={index}>
-                  {/* Dòng "from" */}
                   <tr className="border-b border-mainBorderV1 hover:bg-mainCardV1/50">
                     <td className="py-3 px-4">
-                      {isNullAddress(trace.from) ? (
-                        <span className="text-gray-400 text-sm">Null Address</span>
-                      ) : (
+                      
                         <div className="flex items-center space-x-2">
                           <Blockie address={trace.from} size={18} />
-                          <AddressLink address={trace.from} />
+                          <AddressLink address={trace.from} shorten={false} />
                           <CopyButton
                             text={trace.from}
                             copied={false}
@@ -149,7 +146,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                             <Icon path={mdiOpenInNew} size={0.7} />
                           </a>
                         </div>
-                      )}
+                  
                     </td>
                     <td className="py-3 px-4 text-right">
                       <span className="text-sm text-red-400">-{formatValue(trace.value)}</span>
@@ -157,7 +154,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Blockie address={trace.asset} size={18} />
-                        <AddressLink address={trace.asset} isAsset={true} />
+                        <AddressLink address={trace.asset} isAsset={true} shorten={false} />
                         <CopyButton
                           text={trace.asset}
                           copied={false}
@@ -170,15 +167,11 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     </td>
                   </tr>
 
-                  {/* Dòng "to" */}
                   <tr className="border-b border-mainBorderV1 hover:bg-mainCardV1/50">
                     <td className="py-3 px-4">
-                      {isNullAddress(trace.to) ? (
-                        <span className="text-gray-400 text-sm">Null Address</span>
-                      ) : (
                         <div className="flex items-center space-x-2">
                           <Blockie address={trace.to} size={18} />
-                          <AddressLink address={trace.to} />
+                          <AddressLink address={trace.to} shorten={false} />
                           <CopyButton
                             text={trace.to}
                             copied={false}
@@ -193,7 +186,6 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                             <Icon path={mdiOpenInNew} size={0.7} />
                           </a>
                         </div>
-                      )}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <span className="text-sm text-green-400">+{formatValue(trace.value)}</span>
@@ -201,7 +193,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Blockie address={trace.asset} size={18} />
-                        <AddressLink address={trace.asset} isAsset={true} />
+                        <AddressLink address={trace.asset} isAsset={true} shorten={false} />
                         <CopyButton
                           text={trace.asset}
                           copied={false}
@@ -223,7 +215,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
       <CardFooter>
         <div className="flex items-center justify-start mt-2 text-xs text-gray-400">
           <span>
-            Tổng số: {traces.length} traces ({traces.length * 2} dòng)
+            Total: {traces.length} traces ({traces.length * 2} rows)
           </span>
         </div>
       </CardFooter>

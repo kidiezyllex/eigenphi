@@ -8,9 +8,10 @@ import TransactionSummary from './TransactionSummary'
 import TracesTable from './TracesTable'
 import SocialButton from './SocialButton'
 import { getTransactionType } from './utils'
-import { TransactionSummaryData } from './types'
+import { MevType, TransactionSummaryData } from './types'
 import Icon from '@mdi/react'
 import { mdiMagnify, mdiEthereum, mdiConsole } from '@mdi/js'
+import { de } from 'date-fns/locale'
 
 export const EthereumTxPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -20,42 +21,87 @@ export const EthereumTxPage: React.FC = () => {
   
   const transactionType = getTransactionType(apiResponse?.label)
   
-  // Prepare transaction data from API response
-  const transactionData = {
-    summary: apiResponse ? {
-      mevType: apiResponse.label || "Transaction",
-      time: apiResponse.time || apiResponse.timestamp || "",
-      transactionHash: apiResponse.hash || "",
-      from: apiResponse.from || "",
-      contractTo: apiResponse.to || "",
-      profit: apiResponse.profit || "0",
-      cost: apiResponse.cost || "0", 
-      revenue: (() => {
-        // Kiểm tra và sửa lỗi định dạng số trong revenue
-        if (!apiResponse.revenue) return "0";
-        if (apiResponse.revenue.includes(apiResponse.profit || "") && apiResponse.profit) {
-          return apiResponse.profit;
-        }
-        return apiResponse.revenue;
-      })(),
-      blockNumber: apiResponse.blockNumber || 0,
-      position: apiResponse.index || 0,
-      gasPrice: apiResponse.gasPrice,
-      gasUsed: apiResponse.gasUsed,
-      timestamp: apiResponse.timestamp
-    } as TransactionSummaryData : {
-      mevType: "Transaction",
-      time: "",
+  const getSummaryData = (apiResponse: any) => {
+    switch (apiResponse?.label) {
+      case MevType.Arbitrage.toUpperCase(): {
+        return {
+          mevType: apiResponse.label,
+          time: apiResponse.time,
+          transactionHash: apiResponse.hash,
+          from: apiResponse.from,
+          contractTo: apiResponse.to,
+          profit: apiResponse.profit,
+          cost: apiResponse.cost, 
+          revenue: (() => {
+            if (!apiResponse.revenue) return "0";
+            if (apiResponse.revenue.includes(apiResponse.profit || "") && apiResponse.profit) {
+              return apiResponse.profit;
+            }
+            return apiResponse.revenue;
+          })(),
+          blockNumber: apiResponse.blockNumber,
+          position: apiResponse.index,
+          timestamp: apiResponse.timestamp
+        } 
+      }
+      case MevType.Sandwich.toUpperCase(): {
+        return {
+            label: MevType.Sandwich, 
+            sandwichId: apiResponse.id,
+            blockNumber: apiResponse.blockNumber,
+            profit: apiResponse.profit,
+            cost: apiResponse.cost,
+            revenue: apiResponse.revenue,
+            time: apiResponse.time,
+          }
+      }
+      case MevType.Liquidation.toUpperCase(): {
+        return {
+            label: MevType.Liquidation, 
+            transactionHash: apiResponse.hash,
+            blockNumber: apiResponse.blockNumber,
+            from: apiResponse.from,
+            contractTo: apiResponse.to,
+            profit: apiResponse.profit,
+            cost: apiResponse.cost,
+            revenue: apiResponse.revenue,
+            time: apiResponse.time,
+            borrower: apiResponse.borrower,
+            liquidator: apiResponse.liquidator,
+            debtToken: apiResponse.debtToken,
+            debtToCover: apiResponse.debtToCover,
+            liquidatedToken: apiResponse.liquidatedToken,
+            liquidatedAmount: apiResponse.liquidatedAmount,
+          }
+      }
+    }
+    if (!apiResponse.label) {
+      return {
+        label: MevType.Normal,
+        transactionHash: apiResponse.hash,
+        from: apiResponse.from,
+        contractTo: apiResponse.to,
+        blockNumber: apiResponse.blockNumber,
+        gasPrice: apiResponse.gasPrice,
+        gasUsed: apiResponse.gasUsed,
+        time: apiResponse.time,
+        timestamp: apiResponse.timestamp
+      }
+    }
+    return {
+      label: "None",
       transactionHash: "",
       from: "",
       contractTo: "",
-      profit: "0",
-      cost: "0",
-      revenue: "0",
       blockNumber: 0,
-      position: 0
+      gasPrice: "",
+      gasUsed: "",
+      time: "",
+      timestamp: ""
     }
   }
+
+  const transactionData = getSummaryData(apiResponse);
   
   useEffect(() => {
     // Simulate loading data
@@ -87,18 +133,27 @@ export const EthereumTxPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center text-sm text-gray-400 mb-2">
-              <span>For: {apiResponse?.data?.from ? `${apiResponse.data.from.substring(0, 6)}...${apiResponse.data.from.substring(apiResponse.data.from.length - 4)}` : "0x34a...c87c"}</span>
-            </div>
-
             {isLoading ? (
-              <LoadingState />
-            ) : (
-              <div className="grid grid-cols-1 gap-6">
-                <TransactionSummary data={transactionData.summary} />
-                <TracesTable traces={apiResponse?.traces} />
-              </div>
-            )}
+                <LoadingState />
+              ) : apiResponse?.label === "SANDWICH" ? (
+                <div className="grid grid-cols-1 gap-6">
+                  <TransactionSummary data={transactionData} />
+                  <h2>Front Run</h2>
+                  {/* <h6>Tx Index: {apiResponse?.frontRun[0]?.transactionLogIndex}</h6> */}
+                  <TracesTable traces={apiResponse?.frontRun[0]?.traces} />
+                  <h2>Victim</h2>
+                  {/* <h6>Tx Index: {apiResponse?.victim[0]?.transactionLogIndex}</h6> */}
+                  <TracesTable traces={apiResponse?.victim[0]?.traces} />
+                  <h2>Back Run</h2>
+                  {/* <h6>Tx Index: {apiResponse?.backRun[0]?.transactionLogIndex}</h6> */}
+                  <TracesTable traces={apiResponse?.backRun[0]?.traces} />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
+                  <TransactionSummary data={transactionData} />
+                  <TracesTable traces={apiResponse?.traces} />
+                </div>
+              )}
           </div>
         </motion.div>
     </div>
