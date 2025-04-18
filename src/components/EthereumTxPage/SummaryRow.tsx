@@ -96,20 +96,20 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, isLast }) => {
             <div className="flex items-center space-x-2">
               <Blockie address={value} size={18} />
               <AddressLink address={value} />
-              <CopyButton text={value} copied={copied} onCopy={handleCopy} />
+              <CopyButton text={""} copied={copied} onCopy={handleCopy} />
             </div>
           )}
           {isHash && (
             <div className="flex items-center space-x-2">
               <AddressLink address={value} isHash />
-              <CopyButton text={value} copied={copied} onCopy={handleCopy} />
+              <CopyButton text={""} copied={copied} onCopy={handleCopy} />
             </div>
           )}
           {isNumber && (
             <div className="flex items-center space-x-2">
               <span className="text-sm text-white">{formatNumericValue(value, label)}</span>
               {label.toLowerCase() === "blocknumber" && (
-                <CopyButton text={value.toString()} copied={copied} onCopy={handleCopy} />
+                <CopyButton text={""} copied={copied} onCopy={handleCopy} />
               )}
             </div>
           )}
