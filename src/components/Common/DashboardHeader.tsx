@@ -62,7 +62,7 @@ export default function DashboardHeader() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.length > 10) {
-      router.push(`/mev/ethereum/tx/${apiResponse.hash}`);
+      router.push(`/mev/ethereum/tx/${searchTerm}`);
     } else {
       toast.info('Please enter a valid hash to search');
     }
