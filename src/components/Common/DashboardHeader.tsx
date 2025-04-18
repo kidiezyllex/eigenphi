@@ -61,10 +61,10 @@ export default function DashboardHeader() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (apiResponse && searchTerm.length > 10) {
+    if (searchTerm.length > 10) {
       router.push(`/mev/ethereum/tx/${apiResponse.hash}`);
     } else {
-      toast.info('Vui lòng nhập hash hợp lệ để tìm kiếm');
+      toast.info('Please enter a valid hash to search');
     }
   };
 
