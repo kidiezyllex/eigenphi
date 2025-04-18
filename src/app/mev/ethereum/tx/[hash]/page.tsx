@@ -531,19 +531,17 @@ export default function ArbitrageTransactionPage() {
   const {data: apiResponse} = useGetMevTransactionByHash(hash)
   
   const getTransactionType = (label: string | null | undefined) => {
-    if (!label) return "Transaction"
+    if (!label) return "None"
     
     switch(label.toUpperCase()) {
       case "ARBITRAGE":
-        return "Arbitrage Transaction"
+        return "Arbitrage"
       case "SANDWICH":
-        return "Sandwich Attack"
+        return "Sandwich"
       case "LIQUIDATION":
         return "Liquidation"
-      case "FRONTRUN":
-        return "Frontrunning"
       default:
-        return label + " Transaction"
+        return "None"
     }
   }
   
