@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Icon } from '@mdi/react';
 import {
+  mdiEthereum,
   mdiMagnify,
 } from '@mdi/js';
 import { useMenuSidebar } from '@/stores/useMenuSidebar';
@@ -78,7 +79,7 @@ export default function DashboardHeader() {
     p-4 bg-mainBackgroundV1 border-b border-b-mainBorderV1 flex justify-between items-center h-[78px]">
       <div className='flex items-center w-[244px] justify-between'>
         <Link href="/">
-          <div className='h-8 w-[138px] relative'>
+          {/* <div className='h-8 w-[138px] relative'>
             <Image
               width={200}
               height={200}
@@ -86,7 +87,11 @@ export default function DashboardHeader() {
               draggable={false}
               src="/images/logo.svg" alt="logo"
               className='object-contain h-full w-full' />
-          </div>
+          </div> */}
+          <div className='text-mainActiveV1 text-3xl font-bold flex items-center'>
+            Mev
+            <Icon path={mdiEthereum} size={1.2} className='text-mainActiveV1' />
+            <span className='text-mainGrayV1'>Inspect</span></div>
         </Link>
         <Button
           variant="ghost"
