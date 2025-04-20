@@ -104,7 +104,7 @@ export default function DashboardLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         <DashboardHeader />
-        <main className={`flex-1 p-6 overflow-auto bg-mainDarkBackgroundV1 ${isOpen ? 'pl-[260px]' : 'pl-[68px]'} mt-[78px] min-h-screen transition-all duration-300`}>
+        <main className={`flex-1 overflow-auto bg-mainDarkBackgroundV1 ${isOpen ? 'pl-[260px]' : 'pl-[68px]'} mt-[78px] min-h-screen transition-all duration-300`}>
           {children}
         </main>
       </div>

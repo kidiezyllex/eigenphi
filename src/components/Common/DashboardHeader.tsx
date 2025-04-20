@@ -61,6 +61,7 @@ export default function DashboardHeader() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (searchTerm.length > 10) {
       router.push(`/mev/ethereum/tx/${searchTerm}`);
     } else {
@@ -79,19 +80,11 @@ export default function DashboardHeader() {
     p-4 bg-mainBackgroundV1 border-b border-b-mainBorderV1 flex justify-between items-center h-[78px]">
       <div className='flex items-center w-[244px] justify-between'>
         <Link href="/">
-          {/* <div className='h-8 w-[138px] relative'>
-            <Image
-              width={200}
-              height={200}
-              quality={100}
-              draggable={false}
-              src="/images/logo.svg" alt="logo"
-              className='object-contain h-full w-full' />
-          </div> */}
-          <div className='text-mainActiveV1 text-3xl font-bold flex items-center'>
-            Mev
-            <Icon path={mdiEthereum} size={1.2} className='text-mainActiveV1' />
-            <span className='text-mainGrayV1'>Inspect</span></div>
+          <div className='text-mainActiveV1 text-3xl font-bold flex items-center gap-0'>
+            <span className='mr-[-3px] tracking-tighter'>Mev</span>
+            <Icon path={mdiEthereum} size={1.2} className='text-mainActiveV1 mx-[-2px]' />
+            <span className='text-mainGrayV1 ml-[-3px] tracking-tighter'>Inspect</span>
+          </div>
         </Link>
         <Button
           variant="ghost"
@@ -109,11 +102,6 @@ export default function DashboardHeader() {
         </Button>
       </div>
       <div className="flex items-center gap-4">
-
-        <Button variant="outline" className='bg-transparent border-mainBorderV1 hover:border-mainActiveV1 hover:bg-mainActiveV1/10 h-9 !text-white'>
-          Ethereum
-        </Button>
-
         <div className="relative hidden md:block">
           <form className="relative flex items-center" onSubmit={handleSearchSubmit}>
             <Input
@@ -124,16 +112,6 @@ export default function DashboardHeader() {
               onChange={handleSearchChange}
               onFocus={() => searchTerm.length > 10 && setIsResultVisible(true)}
             />
-            {/* <div 
-              className="absolute right-3 cursor-pointer" 
-              onClick={handleSearchSubmit}
-            >
-              <Icon
-                path={mdiMagnify}
-                size={0.8}
-                className="text-mainGrayV1"
-              />
-            </div> */}
           </form>
           
           {isResultVisible && apiResponse && (
@@ -141,46 +119,48 @@ export default function DashboardHeader() {
               ref={searchResultRef}
               className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 max-h-[400px] overflow-y-auto"
             >
-              <div 
+              // TODO: Fix this for sandwich
+              <div
                 className="p-3 hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
-                onClick={() => handleSearchItemClick(apiResponse.hash)}
+                onClick={() => handleSearchItemClick(apiResponse?.hash)}
               >
                 <div className="flex justify-between items-center">
                   <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
-                    {apiResponse.hash}
+                    {apiResponse?.hash}
                   </div>
                   <div className="text-xs text-mainGrayV1">
-                    {formatDate(apiResponse.timestamp || apiResponse.time || '')}
+                    {formatDate(apiResponse?.timestamp || apiResponse?.time || '')}
                   </div>
                 </div>
                 <div className="mt-1 flex justify-between">
                   <div className="text-sm flex items-center gap-1">
                     <span className="text-mainGrayV1">Block:</span> 
-                    <span className='text-white'>{apiResponse.blockNumber}</span>
+                    <span className='text-white'>{apiResponse?.blockNumber}</span>
                   </div>
-                  {apiResponse.label && (
+                  {apiResponse?.label && (
+                    // TODO: change this color for 3 other labels
                     <div className={cn(
                       "px-2 py-0.5 text-xs rounded-full",
-                      apiResponse.label === "ARBITRAGE" ? "bg-green-500/20 text-green-400" : "bg-blue-500/20 text-blue-400"
+                      apiResponse?.label === "ARBITRAGE" ? "bg-green-500/20 text-green-400" : "bg-blue-500/20 text-blue-400"
                     )}>
-                      {apiResponse.label}
+                      {apiResponse?.label}
                     </div>
                   )}
                 </div>
                 <div className="mt-1 text-sm flex justify-between">
                   <div className='flex items-center gap-1'>
                     <span className="text-mainGrayV1">From:</span> 
-                    <span className='text-white'>{formatAddress(apiResponse.from)}</span>
+                    <span className='text-white'>{formatAddress(apiResponse?.from)}</span>
                   </div>
                   <div className='flex items-center gap-1'>
                     <span className="text-mainGrayV1">To:</span> 
-                    <span className='text-white'>{formatAddress(apiResponse.to)}</span>
+                    <span className='text-white'>{formatAddress(apiResponse?.to)}</span>
                   </div>
                 </div>
-                {apiResponse.profit && (
+                {apiResponse?.profit && (
                   <div className="mt-1 text-sm flex items-center gap-1">
-                    <span className="text-mainGrayV1">Lợi nhuận:</span> 
-                    <span className='text-white'>{parseFloat(apiResponse.profit).toFixed(4)} ETH</span>
+                    <span className="text-mainGrayV1">Profit:</span> 
+                    <span className='text-white'>{parseFloat(apiResponse?.profit).toFixed(4)} ETH</span>
                   </div>
                 )}
               </div>

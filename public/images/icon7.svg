@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="16px" viewBox="0 0 15 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Cronos-light</title>
+    <g id="控件" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Subheader-100dark" transform="translate(-219.000000, -61.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="编组-4" transform="translate(90.000000, 20.000000)">
+                <g id="编组-3" transform="translate(0.000000, 37.000000)">
+                    <g id="编组-2" transform="translate(11.000000, 4.000000)">
+                        <g id="Cronos-light" transform="translate(118.251063, 0.000000)">
+                            <path d="M6.8878424,0 L13.7746736,4.00113768 L13.7746736,11.9998736 L6.8878424,16 L0,11.9998736 L0,4.00113768 L6.8878424,0 Z M6.888348,2.37246785 L2.0412728,5.186866 L2.0412728,10.814651 L6.8878424,13.6280378 L11.7334008,10.814651 L11.7339064,5.186866 L6.888348,2.37246785 Z M6.8873368,4.26407104 L10.1042256,6.13241472 L8.7637712,6.91059632 L6.8873368,5.82043424 L5.0103976,6.91059632 L5.0103976,9.08990928 L6.8873368,10.1795658 L8.7637712,9.08990928 L10.1042256,9.86809088 L6.8873368,11.7364346 L3.6704488,9.86809088 L3.6704488,6.13241472 L6.8873368,4.26407104 Z" id="形状"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -86,12 +86,12 @@ export function FlashloanTopTable({ data, isLoading }: FlashloanTopTableProps) {
               <td className="py-3 px-4 text-sm text-white">{item.amount.toLocaleString()} ETH</td>
               <td className="py-3 px-4 text-sm text-gray-300">${item.amountUSD.toLocaleString()}</td>
               <td className="py-3 px-4 text-sm text-blue-400">
-                <a href={`https://etherscan.io/address/${item.user}`} target="_blank" rel="noopener noreferrer">
+                <a href={`/mev/ethereum/address/${item.user}`} target="_blank" rel="noopener noreferrer">
                   {shortenAddress(item.user)}
                 </a>
               </td>
               <td className="py-3 px-4 text-sm text-blue-400">
-                <a href={`https://etherscan.io/tx/${item.txHash}`} target="_blank" rel="noopener noreferrer">
+                <a href={`/mev/ethereum/tx/${item.txHash}`} target="_blank" rel="noopener noreferrer">
                   {shortenAddress(item.txHash)}
                 </a>
               </td>

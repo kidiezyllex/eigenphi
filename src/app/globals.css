@@ -283,3 +283,41 @@ button[type="button"].absolute:focus {
   display: none !important;
 }
 
+/* Custom styles for pagination buttons */
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+  background-color: var(--mainCardV1) !important;
+  height: 28px !important;
+  width: 28px !important;
+}
+
+.ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination-next:hover .ant-pagination-item-link {
+  background-color: rgba(var(--mainActiveV1), 0.1) !important;
+}
+
+.ant-pagination-prev .anticon,
+.ant-pagination-next .anticon {
+  color: #44D7B6 !important;
+  height: 20px !important;
+  width: 20px !important;
+}
+
+.ant-pagination-item {
+  background-color:  #25262B !important;
+  height: 28px !important;
+  width: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ant-pagination-item:hover {
+  background-color: #44D7B6 !important;
+  color: #ffffff !important;
+}
+
+.ant-pagination-item a {
+  color: #44D7B6 !important;
+}
+

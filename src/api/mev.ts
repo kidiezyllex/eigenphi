@@ -1,4 +1,4 @@
-import { IMevTransaction } from "@/interface/response/mev";
+import { IMevTransaction, IMevBlockResponse } from "@/interface/response/mev";
 import { sendGet } from "./axios";
 
 export const getMevTransactionByHash = async (
@@ -6,5 +6,13 @@ export const getMevTransactionByHash = async (
 ): Promise<IMevTransaction> => {
   const res = await sendGet(`/mev/tx/${hash}`);
   const data: IMevTransaction = res;
+  return data;
+};
+
+export const getMevBlockByNumber = async (
+  blockNumber: number
+): Promise<IMevBlockResponse> => {
+  const res = await sendGet(`/mev/block/${blockNumber}`);
+  const data: IMevBlockResponse = res;
   return data;
 }; 

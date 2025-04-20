@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { IconClock, IconInfoCircle, IconMaximize } from '@tabler/icons-react'
 import SummaryRow from './SummaryRow'
-import { TransactionSummaryData } from './types'
+import { MevType, TransactionSummaryData } from './types'
 
 interface TransactionSummaryProps {
   data: TransactionSummaryData
 }
 
 const TransactionSummary: React.FC<TransactionSummaryProps> = ({ data }) => {
-  const isMevTransaction = data.mevType && data.mevType !== "Transaction";
+  const isMevTransaction = data.mevType && data.mevType !== MevType.Normal;
   const summaryEntries = Object.entries(data).filter(([key, value]) => {
     if (key === "timestamp" && data.time) return false; 
     if ((key === "profit" || key === "cost" || key === "revenue") && !isMevTransaction) {

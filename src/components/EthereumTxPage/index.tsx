@@ -1,62 +1,160 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Separator } from '@/components/ui/separator'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useGetMevTransactionByHash } from '@/hooks/useMev'
 import LoadingState from './LoadingState'
 import TransactionSummary from './TransactionSummary'
 import TracesTable from './TracesTable'
-import SocialButton from './SocialButton'
+import BlockTransactionsTable from './BlockTransactionsTable'
 import { getTransactionType } from './utils'
-import { TransactionSummaryData } from './types'
+import { MevType } from './types'
 import Icon from '@mdi/react'
-import { mdiMagnify, mdiEthereum, mdiConsole } from '@mdi/js'
+import { mdiMagnify, mdiEthereum, mdiConsole, mdiCog, mdiViewGrid, mdiClose, mdiCloseCircle } from '@mdi/js'
+import { Input } from '@/components/ui/input'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Badge } from '../ui/badge'
+import CustomTabs from '../Common/CustomTabs'
+import { useQuery } from '@tanstack/react-query'
+import { getMevBlockByNumber } from '@/api/mev'
 
 export const EthereumTxPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const params = useParams<{ hash: string }>()
   const hash = params.hash || ""
-  const {data: apiResponse} = useGetMevTransactionByHash(hash)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'token-flow'
+  
+  // Fetch transaction data
+  const { data: apiResponse } = useGetMevTransactionByHash(hash)
+  
+  // Fetch block data when blocknumber is available and block tab is active
+  const shouldFetchBlock = Boolean(apiResponse?.blockNumber) && activeTab === 'block'
+  const { data: blockData } = useQuery({
+    queryKey: ['mev', 'block', apiResponse?.blockNumber],
+    queryFn: () => getMevBlockByNumber(apiResponse?.blockNumber || 0),
+    enabled: shouldFetchBlock
+  })
+  
+  const tabs = [
+    { id: 'token-flow', type: 'transactions', value: 'Token Flow' },
+    { id: 'block-number', type: 'transactions', value: `For Block #${apiResponse?.blockNumber}` },
+    { id: 'involving-from', type: 'transactions', value: 'Involving From' },
+    { id: 'involving-to', type: 'transactions', value: 'Involving To' },
+  ]
   
   const transactionType = getTransactionType(apiResponse?.label)
-  
-  // Prepare transaction data from API response
-  const transactionData = {
-    summary: apiResponse ? {
-      mevType: apiResponse.label || "Transaction",
-      time: apiResponse.time || apiResponse.timestamp || "",
-      transactionHash: apiResponse.hash || "",
-      from: apiResponse.from || "",
-      contractTo: apiResponse.to || "",
-      profit: apiResponse.profit || "0",
-      cost: apiResponse.cost || "0", 
-      revenue: (() => {
-        // Kiểm tra và sửa lỗi định dạng số trong revenue
-        if (!apiResponse.revenue) return "0";
-        if (apiResponse.revenue.includes(apiResponse.profit || "") && apiResponse.profit) {
-          return apiResponse.profit;
+
+  const getSummaryData = (apiResponse: any) => {
+    switch (apiResponse?.label) {
+      case MevType.Arbitrage.toUpperCase(): {
+        return {
+          mevType: apiResponse?.label,
+          time: apiResponse?.time,
+          transactionHash: apiResponse?.hash,
+          from: apiResponse?.from,
+          contractTo: apiResponse?.to,
+          profit: apiResponse?.profit,
+          cost: apiResponse?.cost,
+          revenue: (() => {
+            if (!apiResponse?.revenue) return "0";
+            if (apiResponse?.revenue.includes(apiResponse?.profit || "") && apiResponse?.profit) {
+              return apiResponse?.profit;
+            }
+            return apiResponse?.revenue;
+          })(),
+          blockNumber: apiResponse?.blockNumber,
+          position: apiResponse?.index,
+          timestamp: apiResponse?.timestamp
         }
-        return apiResponse.revenue;
-      })(),
-      blockNumber: apiResponse.blockNumber || 0,
-      position: apiResponse.index || 0,
-      gasPrice: apiResponse.gasPrice,
-      gasUsed: apiResponse.gasUsed,
-      timestamp: apiResponse.timestamp
-    } as TransactionSummaryData : {
-      mevType: "Transaction",
-      time: "",
+      }
+      case MevType.Sandwich.toUpperCase(): {
+        return {
+          label: MevType.Sandwich,
+          sandwichId: apiResponse?.id,
+          blockNumber: apiResponse?.blockNumber,
+          profit: apiResponse?.profit,
+          cost: apiResponse?.cost,
+          revenue: apiResponse?.revenue,
+          time: apiResponse?.time,
+        }
+      }
+      case MevType.Liquidation.toUpperCase(): {
+        return {
+          label: MevType.Liquidation,
+          transactionHash: apiResponse?.hash,
+          blockNumber: apiResponse?.blockNumber,
+          from: apiResponse?.from,
+          contractTo: apiResponse?.to,
+          profit: apiResponse?.profit,
+          cost: apiResponse?.cost,
+          revenue: apiResponse?.revenue,
+          time: apiResponse?.time,
+          borrower: apiResponse?.borrower,
+          liquidator: apiResponse?.liquidator,
+          debtToken: apiResponse?.debtToken,
+          debtToCover: apiResponse?.debtToCover,
+          liquidatedToken: apiResponse?.liquidatedToken,
+          liquidatedAmount: apiResponse?.liquidatedAmount,
+        }
+      }
+    }
+    if (!apiResponse?.label) {
+      return {
+        label: MevType.Normal,
+        transactionHash: apiResponse?.hash,
+        from: apiResponse?.from,
+        contractTo: apiResponse?.to,
+        blockNumber: apiResponse?.blockNumber,
+        gasPrice: apiResponse?.gasPrice,
+        gasUsed: apiResponse?.gasUsed,
+        time: apiResponse?.time,
+        timestamp: apiResponse?.timestamp
+      }
+    }
+    return {
+      label: "None",
       transactionHash: "",
       from: "",
       contractTo: "",
-      profit: "0",
-      cost: "0",
-      revenue: "0",
       blockNumber: 0,
-      position: 0
+      gasPrice: "",
+      gasUsed: "",
+      time: "",
+      timestamp: ""
     }
   }
+
+  const transactionData = getSummaryData(apiResponse);
   
+  const handleTabChange = (value: string) => {
+    let tabParam = '';
+    
+    switch (value) {
+      case 'Token Flow':
+        tabParam = '';
+        break;
+      case `For Block #${apiResponse?.blockNumber}`:
+        tabParam = 'block';
+        break;
+      case 'Involving From':
+        tabParam = 'from';
+        break;
+      case 'Involving To':
+        tabParam = 'to';
+        break;
+      default:
+        tabParam = '';
+    }
+    
+    if (tabParam) {
+      router.push(`/mev/ethereum/tx/${hash}?tab=${tabParam}`);
+    } else {
+      router.push(`/mev/ethereum/tx/${hash}`);
+    }
+  }
+
   useEffect(() => {
     // Simulate loading data
     const timer = setTimeout(() => {
@@ -66,11 +164,153 @@ export const EthereumTxPage: React.FC = () => {
     return () => clearTimeout(timer)
   }, [])
 
+  // Render transaction content based on active tab
+  const renderContent = () => {
+    if (isLoading) {
+      return <LoadingState />;
+    }
+    
+    switch (activeTab) {
+      case 'block':
+        return (
+          <div className="grid grid-cols-1 gap-6">
+            {/* Ẩn TransactionSummary nếu là Arbitrage khi ở tab block */}
+            {apiResponse?.label !== "ARBITRAGE" && (
+              <TransactionSummary data={transactionData as any} />
+            )}
+            <BlockTransactionsTable transactions={blockData?.transactions} />
+          </div>
+        );
+      case 'from':
+      case 'to':
+        // These tabs would be implemented later as per requirements
+        return (
+          <div className="grid grid-cols-1 gap-6">
+            <TransactionSummary data={transactionData as any} />
+            <div className="p-6 bg-mainBackgroundV1 border border-mainBorderV1 rounded-md text-center">
+              <p className="text-gray-400">This feature is coming soon.</p>
+            </div>
+          </div>
+        );
+      default:
+        // Default token-flow tab
+        if (apiResponse?.label === "SANDWICH") {
+          return (
+            <div className="grid grid-cols-1 gap-6">
+              <TransactionSummary data={transactionData as any} />
+              <h2>Front Run</h2>
+              <TracesTable traces={(apiResponse as any)?.frontRun[0]?.traces} />
+              <h2>Victim</h2>
+              <TracesTable traces={(apiResponse as any)?.victim[0]?.traces} />
+              <h2>Back Run</h2>
+              <TracesTable traces={(apiResponse as any)?.backRun[0]?.traces} />
+            </div>
+          );
+        } else {
+          return (
+            <div className="grid grid-cols-1 gap-6">
+              <TransactionSummary data={transactionData as any} />
+              <TracesTable traces={apiResponse?.traces} />
+            </div>
+          );
+        }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-mainDarkBackgroundV1 text-white pl-6">
+    <div className="min-h-screen bg-mainDarkBackgroundV1 text-white">
+      {/* Header */}
+      <div
+        style={{
+          backgroundImage: `url("/images/eigentx-bg.png")`,
+          backgroundRepeat: 'repeat-x',
+          backgroundSize: '30% auto',
+        }}
+        className="w-full h-[96px] relative flex items-center justify-between z-50 bg-background border-b border-mainBorderV1 shadow-sm">
+        <div className="flex items-center justify-between gap-4 p-3 w-full">
+          <div className="flex items-center space-x-4">
+            <div className="flex flex-col items-center space-y-2">
+              <Link href="/">
+                <div className='text-mainActiveV1 text-xl font-bold flex items-center gap-0'>
+                  <span className='mr-[-3px] tracking-tighter'>Mev</span>
+                  <Icon path={mdiEthereum} size={1.2} className='text-mainActiveV1 mx-[-2px]' />
+                  <span className='text-mainGrayV1 ml-[-3px] tracking-tighter'>Inspect</span>
+                </div>
+              </Link>
+
+              <div className="flex flex-col">
+                <div className="flex items-center rounded-full bg-black/20 p-1 gap-0.5">
+                  {
+                    ["icon1.svg", "icon2.png", "icon3.svg", "icon4.svg", "icon5.svg", "icon6.svg", "icon7.svg", "icon8.svg"].map((icon, index) => (
+                      <div key={index} className="w-4 h-4 relative">
+                        <Image
+                          height={50}
+                          width={50}
+                          quality={100}
+                          draggable={false}
+                          src={`/images/${icon}`} alt={icon} className="w-full h-full" />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className='flex flex-1 w-full items-center h-12 bg-mainDarkBackgroundV1 rounded-sm'>
+            <div className="flex-1">
+              <div className="relative flex items-center pl-2 pr-10">
+                <Badge variant="outline" className="text-xs flex-shrink-0">
+                  {hash.slice(0, 6)}...{hash.slice(-4)}
+                  <button className="ml-1">
+                    <Icon path={mdiCloseCircle} size={0.8} className="text-mainGrayV1" />
+                  </button>
+                </Badge>
+                <Input
+                  placeholder="Tx Hash"
+                  className="h-9 border-none focus:outline-none bg-transparent focus:ring-0 rounded-none text-white"
+                ></Input>
+              </div>
+            </div>
+
+            {/* Right section with actions */}
+            <div className="flex items-center space-x-4 h-full ">
+              <div className="flex items-center space-x-2">
+                <button className="flex items-center space-x-1 px-3 py-2 rounded-sm hover:bg-mainCardV1 transition-colors">
+                  <Icon path={mdiViewGrid} size={0.7} className="text-mainActiveV1" />
+                  <span className="text-sm text-mainActiveV1">TB Layout</span>
+                </button>
+
+                <div className="h-5 border-l border-mainBorderV1"></div>
+
+                <button className="flex items-center space-x-1 px-3 py-2 rounded-sm hover:bg-mainCardV1 transition-colors">
+                  <Icon path={mdiCog} size={0.7} className="text-mainGrayV1" />
+                  <span className="text-sm text-mainGrayV1">More Settings</span>
+                </button>
+              </div>
+
+              <button className="flex items-center h-full space-x-1 px-4 py-2 bg-mainActiveV1 text-white rounded-tr-sm rounded-br-sm hover:bg-mainActiveV1/90 transition-colors">
+                <Icon path={mdiMagnify} size={0.8} />
+                <span>Search</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Tabslist */}
+      <div className="h-20 px-5 flex items-center justify-start border-b border-b-mainBorderV1">
+        <CustomTabs tabs={tabs} defaultSelected={tabs.find(tab => 
+          (activeTab === 'token-flow' && tab.id === 'token-flow') ||
+          (activeTab === 'block' && tab.id === 'block-number') ||
+          (activeTab === 'from' && tab.id === 'involving-from') ||
+          (activeTab === 'to' && tab.id === 'involving-to')
+        )?.value || tabs[0].value} onChange={handleTabChange} />
+      </div>
+
+      <div className="px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex flex-col space-y-4">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 mt-4">
               <div className="flex items-center justify-between w-full">
                 <h1 className="text-2xl font-bold text-white">{transactionType}</h1>
                 <div className="flex items-center space-x-1">
@@ -87,20 +327,10 @@ export const EthereumTxPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center text-sm text-gray-400 mb-2">
-              <span>For: {apiResponse?.data?.from ? `${apiResponse.data.from.substring(0, 6)}...${apiResponse.data.from.substring(apiResponse.data.from.length - 4)}` : "0x34a...c87c"}</span>
-            </div>
-
-            {isLoading ? (
-              <LoadingState />
-            ) : (
-              <div className="grid grid-cols-1 gap-6">
-                <TransactionSummary data={transactionData.summary} />
-                <TracesTable traces={apiResponse?.traces} />
-              </div>
-            )}
+            {renderContent()}
           </div>
         </motion.div>
+      </div>
     </div>
   )
 }
