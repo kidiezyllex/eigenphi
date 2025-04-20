@@ -149,7 +149,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <LiveStreamTable data={mockData.liveStreamData} />
+                <LiveStreamTable data={mockData.liveStreamData as any} />
               )}
 
             </CardContent>

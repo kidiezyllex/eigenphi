@@ -52,7 +52,7 @@ export function TransactionLeaderboard({ data }: TransactionLeaderboardProps) {
                         className="w-4 h-4 rounded-full overflow-hidden -ml-1 first:ml-0 border border-[#1A1B1E]"
                       >
                         <Image
-                          src={icon || "/placeholder.svg"}
+                          src={icon}
                           alt={item.tokens[i] || "token"}
                           width={16}
                           height={16}

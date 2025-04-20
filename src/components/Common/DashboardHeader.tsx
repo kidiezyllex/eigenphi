@@ -12,7 +12,7 @@ import { useMenuSidebar } from '@/stores/useMenuSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
-import { useGetMevTransactionByHash } from '@/hooks/useMev';
+import { useGetMevTransactionByHash, useGetMevBlockByNumber } from '@/hooks/useMev';
 import { cn, formatDate, formatAddress } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,13 +23,64 @@ export default function DashboardHeader() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isResultVisible, setIsResultVisible] = useState(false);
+  const [showTransactionResult, setShowTransactionResult] = useState(false);
+  const [showBlockResult, setShowBlockResult] = useState(false);
   const searchResultRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const { data: apiResponse, isLoading } = useGetMevTransactionByHash(
-    searchTerm.length > 10 ? searchTerm : ''
+  const isUsingTransaction = searchTerm.length === 66;
+  
+  const { data: transactionData, isLoading: isTransactionLoading } = useGetMevTransactionByHash(
+    isUsingTransaction ? searchTerm : ''
   );
+  
+  const { data: blocksData, isLoading: isBlocksLoading } = useGetMevBlockByNumber(
+    !isUsingTransaction && searchTerm ? Number(searchTerm) : 0
+  );
+  
+  useEffect(() => {
+    if (blocksData) {
+      console.log('blocksData đã nhận được:', blocksData);
+      setShowBlockResult(true);
+    }
+  }, [blocksData]);
+  
+  useEffect(() => {
+    if (transactionData) {
+      console.log('transactionData đã nhận được:', transactionData);
+      setShowTransactionResult(true);
+    }
+  }, [transactionData]);
+  
+  const isLoading = isUsingTransaction ? isTransactionLoading : isBlocksLoading;
+  
+  const apiResponse = React.useMemo(() => {
+    if (isUsingTransaction && transactionData) {
+      return transactionData;
+    } else if (!isUsingTransaction && blocksData?.block) {
+      const blockData = blocksData.block;
+      return {
+        id: blockData.hash,
+        hash: blockData.hash,
+        blockNumber: blockData.number,
+        timestamp: blockData.timestamp,
+        time: blockData.timestamp,
+        label: null,
+        from: '',
+        to: '',
+        profit: null
+      };
+    }
+    return null;
+  }, [isUsingTransaction, transactionData, blocksData]);
+
+  const hasBlockTransactions = React.useMemo(() => {
+    if (!isUsingTransaction && blocksData) {
+      return true; 
+    }
+    return false;
+  }, [isUsingTransaction, blocksData]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,6 +91,8 @@ export default function DashboardHeader() {
         !inputRef.current.contains(event.target as Node)
       ) {
         setIsResultVisible(false);
+        setShowTransactionResult(false);
+        setShowBlockResult(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -51,17 +104,23 @@ export default function DashboardHeader() {
   useEffect(() => {
     if (!isResultVisible) {
       setSearchTerm('');
+      setShowTransactionResult(false);
+      setShowBlockResult(false);
     }
   }, [isResultVisible]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    if (value.length > 10) {
+    if (value.length > 0) {
       setIsSearching(true);
       setIsResultVisible(true);
+      setShowTransactionResult(false);
+      setShowBlockResult(false);
     } else {
       setIsResultVisible(false);
+      setShowTransactionResult(false);
+      setShowBlockResult(false);
     }
   };
 
@@ -78,6 +137,11 @@ export default function DashboardHeader() {
         return "bg-blue-500/20 text-blue-400";
     }
   };
+
+  // Thêm các useEffect để debug
+  useEffect(() => {
+    console.log('Rendering UI, với blocksData:', !!blocksData, 'showBlockResult:', showBlockResult);
+  });
 
   return (
     <div className="
@@ -115,7 +179,7 @@ export default function DashboardHeader() {
               className='w-[440px] h-9 text-mainGrayV1'
               value={searchTerm}
               onChange={handleSearchChange}
-              onFocus={() => searchTerm.length > 10 && setIsResultVisible(true)}
+              onFocus={() => searchTerm.length > 0 && setIsResultVisible(true)}
             />
             <button
               className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors">
@@ -124,7 +188,8 @@ export default function DashboardHeader() {
             </button>
           </form>
 
-          {isResultVisible && searchTerm.length > 10 && !isLoading && !apiResponse && (
+          {isResultVisible && !isLoading && searchTerm.length > 0 && 
+           !showTransactionResult && !showBlockResult && (
             <div
               ref={searchResultRef}
               className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 p-4"
@@ -139,8 +204,9 @@ export default function DashboardHeader() {
           {isResultVisible && isLoading && (
             <div
               ref={searchResultRef}
-              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto"
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto max-h-[400px]"
             >
+              {/* Skeleton Loading */}
               <div className="p-4 border-b border-mainBorderV1">
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-5 w-[250px]" />
@@ -158,63 +224,195 @@ export default function DashboardHeader() {
                   <Skeleton className="h-4 w-[120px]" />
                 </div>
               </div>
+              <div className="p-4 border-b border-mainBorderV1">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-5 w-[250px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                </div>
+                <div className="mt-1 flex justify-between">
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[80px] rounded-full" />
+                </div>
+              </div>
             </div>
           )}
 
-          {isResultVisible && apiResponse && !isLoading && (
+          {isResultVisible && !isLoading && isUsingTransaction && showTransactionResult && transactionData && (
             <div
               ref={searchResultRef}
               className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto p-4"
             >
               <Link href={
-                apiResponse?.label === "ARBITRAGE" 
-                  ? `/mev/ethereum/arbitrage/tx/${apiResponse?.id || apiResponse?.hash}`
-                  : apiResponse?.label === "LIQUIDATION" 
-                    ? `/mev/ethereum/liquidation/tx/${apiResponse?.id || apiResponse?.hash}`
-                    : apiResponse?.label === "SANDWICH" 
-                      ? `/mev/ethereum/sandwich/tx/${apiResponse?.id || apiResponse?.hash}`
-                      : `/mev/ethereum/tx/${apiResponse?.id || apiResponse?.hash}`
+                transactionData.label === "ARBITRAGE" 
+                  ? `/mev/ethereum/arbitrage/tx/${transactionData.id || transactionData.hash}`
+                  : transactionData.label === "LIQUIDATION" 
+                    ? `/mev/ethereum/liquidation/tx/${transactionData.id || transactionData.hash}`
+                    : transactionData.label === "SANDWICH" 
+                      ? `/mev/ethereum/sandwich/tx/${transactionData.id || transactionData.hash}`
+                      : `/mev/ethereum/tx/${transactionData.id || transactionData.hash}`
               }
                 className="hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
-                onClick={() => setIsResultVisible(false)}
+                onClick={() => {
+                  setIsResultVisible(false);
+                  setShowTransactionResult(false);
+                }}
               >
                 <div className="flex justify-between items-center">
                   <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
-                    {apiResponse?.hash || apiResponse?.id}
+                    {transactionData.hash}
                   </div>
                   <div className="text-xs text-mainGrayV1">
-                    {formatDate(apiResponse?.timestamp || apiResponse?.time || '')}
+                    {formatDate(transactionData.timestamp || transactionData.time || '')}
                   </div>
                 </div>
                 <div className="mt-1 flex justify-between">
                   <div className="text-sm flex items-center gap-1">
                     <span className="text-mainGrayV1">Block:</span>
-                    <span className='text-white'>{apiResponse?.blockNumber}</span>
+                    <span className='text-white'>{transactionData.blockNumber}</span>
                   </div>
-                  <div className={cn(
-                    "px-2 py-0.5 text-xs rounded-full",
-                    getLabelStyles(apiResponse?.label || "")
-                  )}>
-                    {apiResponse?.label || "NORMAL"}
-                  </div>
+                  {transactionData.label && (
+                    <div className={cn(
+                      "px-2 py-0.5 text-xs rounded-full",
+                      getLabelStyles(transactionData.label || "")
+                    )}>
+                      {transactionData.label || "NORMAL"}
+                    </div>
+                  )}
                 </div>
                 <div className="mt-1 text-sm flex justify-between">
                   <div className='flex items-center gap-1'>
                     <span className="text-mainGrayV1">From:</span>
-                    <span className='text-white'>{formatAddress(apiResponse?.from)}</span>
+                    <span className='text-white'>{formatAddress(transactionData.from)}</span>
                   </div>
                   <div className='flex items-center gap-1'>
                     <span className="text-mainGrayV1">To:</span>
-                    <span className='text-white'>{formatAddress(apiResponse?.to)}</span>
+                    <span className='text-white'>{formatAddress(transactionData.to)}</span>
                   </div>
                 </div>
-                {apiResponse?.profit && (
+                {transactionData.profit && (
                   <div className="mt-1 text-sm flex items-center gap-1">
                     <span className="text-mainGrayV1">Profit:</span>
-                    <span className='text-white'>{parseFloat(apiResponse?.profit).toFixed(4)} ETH</span>
+                    <span className='text-white'>{parseFloat(transactionData.profit).toFixed(4)} ETH</span>
                   </div>
                 )}
               </Link>
+            </div>
+          )}
+
+          {isResultVisible && !isLoading && !isUsingTransaction && apiResponse && !showBlockResult && (
+            <div
+              ref={searchResultRef}
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto p-4"
+            >
+              <Link href={`/mev/ethereum/blocks/${apiResponse.blockNumber}`}
+                className="hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
+                onClick={() => setIsResultVisible(false)}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
+                    {apiResponse.hash}
+                  </div>
+                  <div className="text-xs text-mainGrayV1">
+                    {formatDate(apiResponse.timestamp || apiResponse.time || '')}
+                  </div>
+                </div>
+                <div className="mt-1 flex justify-between">
+                  <div className="text-sm flex items-center gap-1">
+                    <span className="text-mainGrayV1">Block:</span>
+                    <span className='text-white'>{apiResponse.blockNumber}</span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
+
+          {isResultVisible && !isLoading && showBlockResult && (
+            <div
+              ref={searchResultRef}
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto max-h-[400px]"
+            >
+              <div className="p-3 border-b border-mainBorderV1">
+                <div
+                  onClick={() => {
+                    setIsResultVisible(false);
+                    setShowBlockResult(false);
+                  }}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
+                      Block: {blocksData?.block?.number}
+                    </div>
+                    <div className="text-xs text-mainGrayV1">
+                      {formatDate(blocksData?.block?.timestamp || '')}
+                    </div>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className="text-mainGrayV1 text-sm">Hash:</span>
+                    <span className='text-white text-sm'>{formatAddress(blocksData?.block?.hash || '')}</span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-1">
+                    <span className="text-mainGrayV1 text-sm">Transactions:</span>
+                    <span className='text-white text-sm'>{blocksData?.transactions ? blocksData.transactions.length : 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-3 py-2 border-b border-mainBorderV1 bg-mainBackgroundV1/40">
+                <p className="text-mainGrayV1 text-sm font-medium">Transactions in block</p>
+              </div>
+
+              {blocksData?.transactions && blocksData.transactions.map((tx: any) => (
+                <div key={tx.hash} className="p-3 border-b border-mainBorderV1 hover:bg-mainActiveV1/10">
+                  <Link href={
+                    tx.label === "ARBITRAGE" 
+                      ? `/mev/ethereum/arbitrage/tx/${tx.hash}`
+                      : tx.label === "LIQUIDATION" 
+                        ? `/mev/ethereum/liquidation/tx/${tx.hash}`
+                        : tx.label === "SANDWICH" 
+                          ? `/mev/ethereum/sandwich/tx/${tx.hash}`
+                          : `/mev/ethereum/tx/${tx.hash}`
+                  }
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setIsResultVisible(false);
+                      setShowBlockResult(false);
+                    }}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
+                        {formatAddress(tx.hash)}
+                      </div>
+                      <div className="text-xs text-mainGrayV1">
+                        {formatDate(tx.timestamp || '')}
+                      </div>
+                    </div>
+                    <div className="mt-1 flex justify-between">
+                      <div className="text-sm flex items-center gap-1">
+                        <span className="text-mainGrayV1">Index:</span>
+                        <span className='text-white'>{tx.index}</span>
+                      </div>
+                      {tx.label && (
+                        <div className={cn(
+                          "px-2 py-0.5 text-xs rounded-full",
+                          getLabelStyles(tx.label || "")
+                        )}>
+                          {tx.label || "NORMAL"}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-1 text-sm flex justify-between">
+                      <div className='flex items-center gap-1'>
+                        <span className="text-mainGrayV1">From:</span>
+                        <span className='text-white'>{formatAddress(tx.from)}</span>
+                      </div>
+                      <div className='flex items-center gap-1'>
+                        <span className="text-mainGrayV1">To:</span>
+                        <span className='text-white'>{formatAddress(tx.to)}</span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
             </div>
           )}
         </div>

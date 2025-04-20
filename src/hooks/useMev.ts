@@ -1,5 +1,5 @@
-import { getMevTransactionByHash, getMevBlockByNumber } from '@/api/mev';
-import { IMevTransaction, IMevBlockResponse } from '@/interface/response/mev';
+import { getMevTransactionByHash, getMevBlockByNumber, getMevBlocks } from '@/api/mev';
+import { IMevTransaction, IMevBlockResponse, IMevBlock } from '@/interface/response/mev';
 import { useQuery } from '@tanstack/react-query';
 
 export const useGetMevTransactionByHash = (hash: string) => {
@@ -16,4 +16,4 @@ export const useGetMevBlockByNumber = (blockNumber: number) => {
     queryFn: () => getMevBlockByNumber(blockNumber),
     enabled: !!blockNumber,
   });
-}; 
+};

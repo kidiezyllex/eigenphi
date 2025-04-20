@@ -4,4 +4,9 @@ export interface IGetMevTxParams {
 
 export interface IGetMevBlockParams {
   blockNumber: number;
+}
+
+export interface IGetMevBlocksParams {
+  page?: number;
+  limit?: number;
 } 

@@ -90,7 +90,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
                     {transaction.tokens.slice(7).map((token: any, idx: number) => (
                       <div key={`tooltip-${token.symbol}-${idx}`} className="flex items-center gap-1">
                         <Image
-                          src={token.iconUrl || "/placeholder.svg"}
+                          src={token.iconUrl}
                           alt={token.symbol}
                           width={16}
                           height={16}
