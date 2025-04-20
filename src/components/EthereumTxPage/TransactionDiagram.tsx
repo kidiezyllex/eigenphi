@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -6,77 +6,86 @@ import { IconInfoCircle, IconMaximize } from '@tabler/icons-react'
 import Lightbox from "yet-another-react-lightbox"
 import Zoom from "yet-another-react-lightbox/plugins/zoom"
 import "yet-another-react-lightbox/styles.css"
+import { mdiChartLine } from '@mdi/js'
+import Icon from '@mdi/react'
 
 interface TransactionDiagramProps {
-  transactionHash: string
+    transactionHash: string
 }
 
 const TransactionDiagram: React.FC<TransactionDiagramProps> = ({ transactionHash }) => {
-  const diagramUrl = `https://tx.eigenphi.io/analyseTransaction.svg?chain=ALL&tx=${transactionHash}`
-  const [open, setOpen] = useState(false)
+    const isValidHash = useMemo(() => {
+        return transactionHash && /^0x([A-Fa-f0-9]{64})$/.test(transactionHash)
+    }, [transactionHash])
 
-  return (
-    <Card className="bg-mainBackgroundV1 border border-mainBorderV1">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center">
-          <CardTitle className="text-sm font-bold text-white">Transaction Diagram</CardTitle>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="ml-1">
-                  <IconInfoCircle className="h-4 w-4 text-gray-400" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="w-[200px] text-xs">Visual representation of transaction flow</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="bg-mainCardV1 hover:bg-mainActiveV1/10 h-7 w-7"
-          onClick={() => setOpen(true)}
-        >
-          <IconMaximize className='text-mainActiveV1 !h-4 !w-4' />
-        </Button>
-      </CardHeader>
+    const diagramUrl = useMemo(() => {
+        return isValidHash
+            ? `https://tx.eigenphi.io/analyseTransaction.svg?chain=ALL&tx=${transactionHash}`
+            : ''
+    }, [transactionHash, isValidHash])
 
-      <CardContent className="p-4 flex justify-center items-center overflow-hidden">
-        {transactionHash ? (
-          <div className="w-full max-h-[500px] overflow-auto">
-            <img 
-              src={diagramUrl} 
-              alt="Transaction Diagram" 
-              className="w-full h-auto cursor-pointer"
-              onClick={() => setOpen(true)}
-              onError={(e) => {
-                // Fallback if image fails to load
-                const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                target.src = '/images/diagram-placeholder.svg';
-              }}
-            />
-            <Lightbox
-              open={open}
-              close={() => setOpen(false)}
-              slides={[{ src: diagramUrl }]}
-              plugins={[Zoom]}
-              zoom={{
-                maxZoomPixelRatio: 3,
-                scrollToZoom: true
-              }}
-            />
-          </div>
-        ) : (
-          <div className="text-center text-gray-400 py-8">
-            <p>No transaction data available</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+    const [open, setOpen] = useState(false)
+
+    return (
+        <Card className="bg-mainBackgroundV1 border border-mainBorderV1">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div className="flex items-center">
+                    <CardTitle className="text-sm font-bold text-white">Transaction Diagram</CardTitle>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button className="ml-1">
+                                    <IconInfoCircle className="h-4 w-4 text-gray-400" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="w-[200px] text-xs">Visual representation of transaction flow</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+                {isValidHash && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="bg-mainCardV1 hover:bg-mainActiveV1/10 h-7 w-7"
+                        onClick={() => setOpen(true)}
+                    >
+                        <IconMaximize className='text-mainActiveV1 !h-4 !w-4' />
+                    </Button>
+                )}
+            </CardHeader>
+
+            <CardContent className="p-4 flex justify-center items-center overflow-hidden">
+                {isValidHash ? (
+                    <div className="w-full max-h-[500px] overflow-auto" style={{ backgroundColor: '#141517' }}>
+                        <img
+                            src={diagramUrl}
+                            alt="Transaction Diagram"
+                            className="w-full h-auto cursor-pointer"
+                            onClick={() => setOpen(true)}
+                        />
+                        <Lightbox
+                            open={open}
+                            close={() => setOpen(false)}
+                            slides={[{ src: diagramUrl }]}
+                            plugins={[Zoom]}
+                            zoom={{
+                                maxZoomPixelRatio: 3,
+                                scrollToZoom: true
+                            }}
+                            styles={{ container: { backgroundColor: '#141517' } }}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-2">
+                        <Icon path={mdiChartLine} size={1} className="text-mainGrayV1 mb-2" />
+                        <p className="text-mainGrayV1 text-center">No transaction data available!</p>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
 }
 
 export default TransactionDiagram 

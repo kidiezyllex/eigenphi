@@ -5,18 +5,17 @@ import Link from 'next/link';
 import { Icon } from '@mdi/react';
 import {
   mdiEthereum,
-  mdiMagnify,
   mdiWalletPlus,
+  mdiRobotVacuumAlert,
 } from '@mdi/js';
 import { useMenuSidebar } from '@/stores/useMenuSidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import Image from 'next/image';
 import { IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
 import { useGetMevTransactionByHash } from '@/hooks/useMev';
 import { cn, formatDate, formatAddress } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardHeader() {
   const { toggle } = useMenuSidebar();
@@ -28,7 +27,7 @@ export default function DashboardHeader() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const { data: apiResponse } = useGetMevTransactionByHash(
+  const { data: apiResponse, isLoading } = useGetMevTransactionByHash(
     searchTerm.length > 10 ? searchTerm : ''
   );
 
@@ -49,6 +48,12 @@ export default function DashboardHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isResultVisible) {
+      setSearchTerm('');
+    }
+  }, [isResultVisible]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -59,9 +64,19 @@ export default function DashboardHeader() {
       setIsResultVisible(false);
     }
   };
-  const handleSearchItemClick = (hash: string) => {
-    setIsResultVisible(false);
-    router.push(`/mev/ethereum/tx/${hash}`);
+
+
+  const getLabelStyles = (label: string) => {
+    switch (label) {
+      case "ARBITRAGE":
+        return "bg-green-500/20 text-green-400";
+      case "LIQUIDATION":
+        return "bg-red-500/20 text-red-400";
+      case "SANDWICH":
+        return "bg-orange-500/20 text-orange-400";
+      default:
+        return "bg-blue-500/20 text-blue-400";
+    }
   };
 
   return (
@@ -109,21 +124,63 @@ export default function DashboardHeader() {
             </button>
           </form>
 
-
-
-          {isResultVisible && apiResponse && (
+          {isResultVisible && searchTerm.length > 10 && !isLoading && !apiResponse && (
             <div
               ref={searchResultRef}
-              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 max-h-[400px] overflow-y-auto"
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 p-4"
             >
-              // TODO: Fix this for sandwich
-              <div
-                className="p-3 hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
-                onClick={() => handleSearchItemClick(apiResponse?.hash)}
+              <div className="flex flex-col items-center justify-center py-2">
+                <Icon path={mdiRobotVacuumAlert} size={1} className="text-mainGrayV1 mb-2" />
+                <p className="text-mainGrayV1 text-center">No matching results found!</p>
+              </div>
+            </div>
+          )}
+
+          {isResultVisible && isLoading && (
+            <div
+              ref={searchResultRef}
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto"
+            >
+              <div className="p-4 border-b border-mainBorderV1">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-5 w-[250px]" />
+                  <Skeleton className="h-4 w-[100px]" />
+                </div>
+                <div className="mt-1 flex justify-between">
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[80px] rounded-full" />
+                </div>
+                <div className="mt-1 flex justify-between">
+                  <Skeleton className="h-4 w-[150px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                </div>
+                <div className="mt-1">
+                  <Skeleton className="h-4 w-[120px]" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isResultVisible && apiResponse && !isLoading && (
+            <div
+              ref={searchResultRef}
+              className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 overflow-y-auto p-4"
+            >
+              <Link href={
+                apiResponse?.label === "ARBITRAGE" 
+                  ? `/mev/ethereum/arbitrage/tx/${apiResponse?.id || apiResponse?.hash}`
+                  : apiResponse?.label === "LIQUIDATION" 
+                    ? `/mev/ethereum/liquidation/tx/${apiResponse?.id || apiResponse?.hash}`
+                    : apiResponse?.label === "SANDWICH" 
+                      ? `/mev/ethereum/sandwich/tx/${apiResponse?.id || apiResponse?.hash}`
+                      : `/mev/ethereum/tx/${apiResponse?.id || apiResponse?.hash}`
+              }
+                className="hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
+                onClick={() => setIsResultVisible(false)}
               >
                 <div className="flex justify-between items-center">
                   <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
-                    {apiResponse?.hash}
+                    {apiResponse?.hash || apiResponse?.id}
                   </div>
                   <div className="text-xs text-mainGrayV1">
                     {formatDate(apiResponse?.timestamp || apiResponse?.time || '')}
@@ -134,15 +191,12 @@ export default function DashboardHeader() {
                     <span className="text-mainGrayV1">Block:</span>
                     <span className='text-white'>{apiResponse?.blockNumber}</span>
                   </div>
-                  {apiResponse?.label && (
-                    // TODO: change this color for 3 other labels
-                    <div className={cn(
-                      "px-2 py-0.5 text-xs rounded-full",
-                      apiResponse?.label === "ARBITRAGE" ? "bg-green-500/20 text-green-400" : "bg-blue-500/20 text-blue-400"
-                    )}>
-                      {apiResponse?.label}
-                    </div>
-                  )}
+                  <div className={cn(
+                    "px-2 py-0.5 text-xs rounded-full",
+                    getLabelStyles(apiResponse?.label || "")
+                  )}>
+                    {apiResponse?.label || "NORMAL"}
+                  </div>
                 </div>
                 <div className="mt-1 text-sm flex justify-between">
                   <div className='flex items-center gap-1'>
@@ -160,7 +214,7 @@ export default function DashboardHeader() {
                     <span className='text-white'>{parseFloat(apiResponse?.profit).toFixed(4)} ETH</span>
                   </div>
                 )}
-              </div>
+              </Link>
             </div>
           )}
         </div>

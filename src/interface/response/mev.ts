@@ -33,6 +33,7 @@ export interface IMevBlockResponse {
 }
 
 export interface IMevTransaction {
+  id: string;
   label: string | null;
   time?: string;
   hash: string;

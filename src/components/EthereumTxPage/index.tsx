@@ -53,7 +53,7 @@ export const EthereumTxPage: React.FC = () => {
         return {
           mevType: apiResponse?.label,
           time: apiResponse?.time,
-          transactionHash: apiResponse?.hash,
+          transactionHash: apiResponse?.hash || apiResponse?.id,
           from: apiResponse?.from,
           contractTo: apiResponse?.to,
           profit: apiResponse?.profit,
@@ -84,7 +84,7 @@ export const EthereumTxPage: React.FC = () => {
       case MevType.Liquidation.toUpperCase(): {
         return {
           label: MevType.Liquidation,
-          transactionHash: apiResponse?.hash,
+          transactionHash: apiResponse?.hash || apiResponse?.id,
           blockNumber: apiResponse?.blockNumber,
           from: apiResponse?.from,
           contractTo: apiResponse?.to,
@@ -104,7 +104,7 @@ export const EthereumTxPage: React.FC = () => {
     if (!apiResponse?.label) {
       return {
         label: MevType.Normal,
-        transactionHash: apiResponse?.hash,
+        transactionHash: apiResponse?.hash || apiResponse?.id,
         from: apiResponse?.from,
         contractTo: apiResponse?.to,
         blockNumber: apiResponse?.blockNumber,

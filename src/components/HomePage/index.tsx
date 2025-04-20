@@ -35,8 +35,6 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Market Overview</h1>
         </div>
-
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <Card className="bg-mainBackgroundV1 border border-mainBorderV1">
             <CardHeader className="flex flex-row items-center justify-between">
