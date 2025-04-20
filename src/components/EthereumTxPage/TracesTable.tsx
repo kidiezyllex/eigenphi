@@ -107,8 +107,8 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+        <div className="overflow-x-auto max-w-full">
+          <table className="w-full border-collapse min-w-full table-fixed">
             <thead className="bg-mainCardV1">
               <tr>
                 <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium">

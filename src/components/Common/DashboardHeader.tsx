@@ -6,6 +6,7 @@ import { Icon } from '@mdi/react';
 import {
   mdiEthereum,
   mdiMagnify,
+  mdiWalletPlus,
 } from '@mdi/js';
 import { useMenuSidebar } from '@/stores/useMenuSidebar';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,7 @@ export default function DashboardHeader() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        searchResultRef.current && 
+        searchResultRef.current &&
         !searchResultRef.current.contains(event.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
@@ -58,17 +59,6 @@ export default function DashboardHeader() {
       setIsResultVisible(false);
     }
   };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (searchTerm.length > 10) {
-      router.push(`/mev/ethereum/tx/${searchTerm}`);
-    } else {
-      toast.info('Please enter a valid hash to search');
-    }
-  };
-
   const handleSearchItemClick = (hash: string) => {
     setIsResultVisible(false);
     router.push(`/mev/ethereum/tx/${hash}`);
@@ -76,7 +66,7 @@ export default function DashboardHeader() {
 
   return (
     <div className="
-    w-screen fixed top-0 left-0 right-0 z-50
+    w-full fixed top-0 left-0 right-0 z-[1000]
     p-4 bg-mainBackgroundV1 border-b border-b-mainBorderV1 flex justify-between items-center h-[78px]">
       <div className='flex items-center w-[244px] justify-between'>
         <Link href="/">
@@ -103,7 +93,7 @@ export default function DashboardHeader() {
       </div>
       <div className="flex items-center gap-4">
         <div className="relative hidden md:block">
-          <form className="relative flex items-center" onSubmit={handleSearchSubmit}>
+          <form className="relative flex items-center gap-4">
             <Input
               ref={inputRef}
               placeholder="Search by Address/Txn Hash/Block Number/Symbol"
@@ -112,10 +102,17 @@ export default function DashboardHeader() {
               onChange={handleSearchChange}
               onFocus={() => searchTerm.length > 10 && setIsResultVisible(true)}
             />
+            <button
+              className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors">
+              <Icon path={mdiWalletPlus} size={0.7} className="text-mainActiveV1" />
+              <span className="text-sm text-mainActiveV1">Connect Wallet</span>
+            </button>
           </form>
-          
+
+
+
           {isResultVisible && apiResponse && (
-            <div 
+            <div
               ref={searchResultRef}
               className="absolute w-full mt-2 bg-mainCardV1 rounded-md shadow-lg border border-mainBorderV1 z-50 max-h-[400px] overflow-y-auto"
             >
@@ -134,7 +131,7 @@ export default function DashboardHeader() {
                 </div>
                 <div className="mt-1 flex justify-between">
                   <div className="text-sm flex items-center gap-1">
-                    <span className="text-mainGrayV1">Block:</span> 
+                    <span className="text-mainGrayV1">Block:</span>
                     <span className='text-white'>{apiResponse?.blockNumber}</span>
                   </div>
                   {apiResponse?.label && (
@@ -149,17 +146,17 @@ export default function DashboardHeader() {
                 </div>
                 <div className="mt-1 text-sm flex justify-between">
                   <div className='flex items-center gap-1'>
-                    <span className="text-mainGrayV1">From:</span> 
+                    <span className="text-mainGrayV1">From:</span>
                     <span className='text-white'>{formatAddress(apiResponse?.from)}</span>
                   </div>
                   <div className='flex items-center gap-1'>
-                    <span className="text-mainGrayV1">To:</span> 
+                    <span className="text-mainGrayV1">To:</span>
                     <span className='text-white'>{formatAddress(apiResponse?.to)}</span>
                   </div>
                 </div>
                 {apiResponse?.profit && (
                   <div className="mt-1 text-sm flex items-center gap-1">
-                    <span className="text-mainGrayV1">Profit:</span> 
+                    <span className="text-mainGrayV1">Profit:</span>
                     <span className='text-white'>{parseFloat(apiResponse?.profit).toFixed(4)} ETH</span>
                   </div>
                 )}

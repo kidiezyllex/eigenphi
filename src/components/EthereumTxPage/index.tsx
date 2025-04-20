@@ -17,6 +17,7 @@ import { Badge } from '../ui/badge'
 import CustomTabs from '../Common/CustomTabs'
 import { useQuery } from '@tanstack/react-query'
 import { getMevBlockByNumber } from '@/api/mev'
+import TransactionDiagram from './TransactionDiagram'
 
 export const EthereumTxPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -174,7 +175,6 @@ export const EthereumTxPage: React.FC = () => {
       case 'block':
         return (
           <div className="grid grid-cols-1 gap-6">
-            {/* Ẩn TransactionSummary nếu là Arbitrage khi ở tab block */}
             {apiResponse?.label !== "ARBITRAGE" && (
               <TransactionSummary data={transactionData as any} />
             )}
@@ -183,7 +183,6 @@ export const EthereumTxPage: React.FC = () => {
         );
       case 'from':
       case 'to':
-        // These tabs would be implemented later as per requirements
         return (
           <div className="grid grid-cols-1 gap-6">
             <TransactionSummary data={transactionData as any} />
@@ -197,6 +196,7 @@ export const EthereumTxPage: React.FC = () => {
         if (apiResponse?.label === "SANDWICH") {
           return (
             <div className="grid grid-cols-1 gap-6">
+              <TransactionDiagram transactionHash={hash} />
               <TransactionSummary data={transactionData as any} />
               <h2>Front Run</h2>
               <TracesTable traces={(apiResponse as any)?.frontRun[0]?.traces} />
@@ -209,6 +209,7 @@ export const EthereumTxPage: React.FC = () => {
         } else {
           return (
             <div className="grid grid-cols-1 gap-6">
+              <TransactionDiagram transactionHash={hash} />
               <TransactionSummary data={transactionData as any} />
               <TracesTable traces={apiResponse?.traces} />
             </div>
