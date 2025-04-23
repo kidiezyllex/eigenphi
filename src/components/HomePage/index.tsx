@@ -15,12 +15,16 @@ import { TransactionLeaderboard } from "./TransactionLeaderboard"
 import { IconInfoCircle, IconMaximize, IconClock } from "@tabler/icons-react"
 import { motion } from "framer-motion"
 import { mockData } from "./mockData"
+import { useGetMevByAddress, useGetMevLatest, useGetMevOverview } from "@/hooks/useMev"
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("24H")
   const [tokensView, setTokensView] = useState("chart")
   const [poolsView, setPoolsView] = useState("chart")
+  const { data: mevLatest } = useGetMevLatest()
+  const { data: mevByAddress } = useGetMevByAddress("0xc02e1b910adc11ce3a04fc41c723aff661a04d67")
+  console.log(mevByAddress)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,7 +34,7 @@ export default function Dashboard() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-mainDarkBackgroundV1 text-white pl-6">
+    <div className="min-h-screen bg-mainDarkBackgroundV1 text-white p-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Market Overview</h1>

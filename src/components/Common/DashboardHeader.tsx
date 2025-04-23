@@ -28,6 +28,8 @@ export default function DashboardHeader() {
   const searchResultRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [account, setAccount] = useState<string>('');
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const isUsingTransaction = searchTerm.length === 66;
   
@@ -107,6 +109,69 @@ export default function DashboardHeader() {
     }
   }, [isResultVisible]);
 
+  // Kiểm tra xem MetaMask đã được cài đặt chưa
+  useEffect(() => {
+    const checkIfMetaMaskIsInstalled = async () => {
+      try {
+        const { ethereum } = window as any;
+        if (ethereum && ethereum.isMetaMask) {
+          // MetaMask đã được cài đặt
+          // Kiểm tra xem người dùng đã kết nối trước đó chưa
+          const accounts = await ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            setAccount(accounts[0]);
+          }
+
+          // Lắng nghe sự kiện thay đổi tài khoản
+          ethereum.on('accountsChanged', (newAccounts: string[]) => {
+            if (newAccounts.length === 0) {
+              // Người dùng đã ngắt kết nối
+              setAccount('');
+            } else {
+              // Người dùng đã chuyển đổi tài khoản
+              setAccount(newAccounts[0]);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Không thể kết nối với MetaMask:", error);
+      }
+    };
+
+    checkIfMetaMaskIsInstalled();
+
+    // Cleanup listener khi component unmount
+    return () => {
+      const { ethereum } = window as any;
+      if (ethereum && ethereum.isMetaMask) {
+        ethereum.removeAllListeners('accountsChanged');
+      }
+    };
+  }, []);
+
+  const connectWallet = async () => {
+    try {
+      setIsConnecting(true);
+      const { ethereum } = window as any;
+      if (!ethereum) {
+        alert("Vui lòng cài đặt MetaMask!");
+        return;
+      }
+
+      // Yêu cầu kết nối với tài khoản
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      setAccount(accounts[0]);
+    } catch (error) {
+      console.error("Lỗi kết nối với MetaMask:", error);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const disconnectWallet = () => {
+    setAccount('');
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -174,11 +239,26 @@ export default function DashboardHeader() {
               onChange={handleSearchChange}
               onFocus={() => searchTerm.length > 0 && setIsResultVisible(true)}
             />
-            <button
-              className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors">
-              <Icon path={mdiWalletPlus} size={0.7} className="text-mainActiveV1" />
-              <span className="text-sm text-mainActiveV1">Connect Wallet</span>
-            </button>
+            {account ? (
+              <button
+                onClick={disconnectWallet}
+                type="button"
+                className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors hover:bg-mainActiveV1/10">
+                <Icon path={mdiEthereum} size={0.7} className="text-mainActiveV1" />
+                <span className="text-sm text-mainActiveV1">{`${account.slice(0, 6)}...${account.slice(-4)}`}</span>
+              </button>
+            ) : (
+              <button
+                onClick={connectWallet}
+                type="button"
+                disabled={isConnecting}
+                className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors hover:bg-mainActiveV1/10">
+                <Icon path={mdiWalletPlus} size={0.7} className="text-mainActiveV1" />
+                <span className="text-sm text-mainActiveV1">
+                  {isConnecting ? "Đang kết nối..." : "Connect Wallet"}
+                </span>
+              </button>
+            )}
           </form>
 
           {isResultVisible && !isLoading && searchTerm.length > 0 && 

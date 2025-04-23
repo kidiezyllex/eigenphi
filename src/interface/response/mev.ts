@@ -52,3 +52,19 @@ export interface IMevTransaction {
   gasPrice?: string;
   timestamp?: string;
 }
+
+// Response cho API /mev/overview/
+export interface IMevOverview {
+  // Giả định cấu trúc dữ liệu dựa trên tên "aggregated overview"
+  totalMevTransactions: number;
+  totalProfit: string; // Sử dụng string để tránh vấn đề độ chính xác của number lớn
+  // Thêm các trường khác nếu cần
+}
+
+// Response cho API /mev/latest/
+// Giả định API này trả về một danh sách các transaction tương tự như IMevTransaction
+export type IMevLatestResponse = IMevTransaction[];
+
+// Response cho API /address/{address}
+// Giả định API này trả về một danh sách các transaction liên quan đến địa chỉ
+export type IMevAddressResponse = IMevTransaction[];

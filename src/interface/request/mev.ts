@@ -9,4 +9,8 @@ export interface IGetMevBlockParams {
 export interface IGetMevBlocksParams {
   page?: number;
   limit?: number;
+}
+
+export interface IGetMevByAddressParams {
+  address: string;
 } 
