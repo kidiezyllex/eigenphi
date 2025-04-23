@@ -1,11 +1,8 @@
 import { MenuItem } from '@/interface/types';
 import {
-  mdiBreadSlice,
-  mdiChartBar,
-  mdiFlash,
+  mdiClock,
+  mdiBadgeAccount,
   mdiHome,
-  mdiLiquidSpot,
-  mdiVideoHighDefinition,
 } from '@mdi/js';
 
 export const dashboardMenuItems: MenuItem[] = [
@@ -16,27 +13,15 @@ export const dashboardMenuItems: MenuItem[] = [
     icon: mdiHome,
   },
   {
-    id: 'sandwich',
-    name: 'Sandwich',
-    path: '/mev/ethereum/sandwich',
-    icon: mdiBreadSlice,
+    id: 'portfolio',
+    name: 'Portfolio',
+    path: '/mev/ethereum/portfolio',
+    icon: mdiBadgeAccount,
   },
   {
-    id: 'liquidation',
-    name: 'Liquidation',
-    path: '/mev/ethereum/liquidation',
-    icon: mdiLiquidSpot,
-  },
-  {
-    id: 'Flashloan',
-    name: 'Flashloan',
-    path: '/mev/ethereum/flashloan',
-    icon: mdiFlash,
-  },
-  {
-    id: 'txr',
-    name: 'MEV Live-stream',
-    path: '/mev/ethereum/txr',
-    icon: mdiVideoHighDefinition,
+    id: 'latest',
+    name: 'MEV Lastest',
+    path: '/mev/ethereum/latest',
+    icon: mdiClock,
   },
 ]; 

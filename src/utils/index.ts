@@ -93,7 +93,7 @@ export function convertDate(dateString: string): string {
 export function getMonth(dateString: string): string {
   const date = new Date(dateString);
   const month = date.getMonth() + 1; 
-  return `Tháng ${month < 10 ? '0' + month : month}`;
+  return `Month ${month < 10 ? '0' + month : month}`;
 }
 
 export function convertDateFormat(dateString: string): string {

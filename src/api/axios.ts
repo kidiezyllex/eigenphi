@@ -1,22 +1,18 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import cookies from 'js-cookie';
 
-
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   shouldNotify?: boolean;
 }
 
 function getLocalAccessToken() {
-  // Thử lấy token từ cookies trước
   const accessToken = cookies.get('accessToken');
   
-  // Nếu token không có trong cookies, thử lấy từ localStorage
   if (!accessToken && typeof window !== 'undefined') {
     try {
       const tokenFromStorage = localStorage.getItem('token');
       if (tokenFromStorage) {
         const parsedToken = JSON.parse(tokenFromStorage);
-        // Lưu lại token vào cookies để dùng cho các request tiếp theo
         cookies.set('accessToken', parsedToken.token || parsedToken);
         return parsedToken.token || parsedToken;
       }

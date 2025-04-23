@@ -125,7 +125,6 @@ export function TransactionProfitChart({ data }: TransactionProfitChartProps) {
           }) as SVGRectElement | undefined
 
           if (hoverArea) {
-            // Hủy timeout trước đó nếu có
             if (tooltipTimeoutRef.current) {
               clearTimeout(tooltipTimeoutRef.current)
               tooltipTimeoutRef.current = null
