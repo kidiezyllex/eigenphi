@@ -6,7 +6,8 @@ export const useGetMevTransactionByHash = (hash: string) => {
   return useQuery<IMevTransaction, Error>({
     queryKey: ['mev', 'transaction', hash],
     queryFn: () => getMevTransactionByHash(hash),
-    enabled: !!hash,
+    retry: 1,
+    staleTime: 1000 * 60 * 5, 
   });
 };
 

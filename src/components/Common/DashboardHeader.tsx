@@ -41,14 +41,12 @@ export default function DashboardHeader() {
   
   useEffect(() => {
     if (blocksData) {
-      console.log('blocksData đã nhận được:', blocksData);
       setShowBlockResult(true);
     }
   }, [blocksData]);
   
   useEffect(() => {
     if (transactionData) {
-      console.log('transactionData đã nhận được:', transactionData);
       setShowTransactionResult(true);
     }
   }, [transactionData]);
@@ -137,11 +135,6 @@ export default function DashboardHeader() {
         return "bg-blue-500/20 text-blue-400";
     }
   };
-
-  // Thêm các useEffect để debug
-  useEffect(() => {
-    console.log('Rendering UI, với blocksData:', !!blocksData, 'showBlockResult:', showBlockResult);
-  });
 
   return (
     <div className="
@@ -244,12 +237,12 @@ export default function DashboardHeader() {
             >
               <Link href={
                 transactionData.label === "ARBITRAGE" 
-                  ? `/mev/ethereum/arbitrage/tx/${transactionData.id || transactionData.hash}`
+                  ? `/mev/ethereum/arbitrage/tx/${searchTerm}`
                   : transactionData.label === "LIQUIDATION" 
-                    ? `/mev/ethereum/liquidation/tx/${transactionData.id || transactionData.hash}`
+                    ? `/mev/ethereum/liquidation/tx/${searchTerm}`
                     : transactionData.label === "SANDWICH" 
-                      ? `/mev/ethereum/sandwich/tx/${transactionData.id || transactionData.hash}`
-                      : `/mev/ethereum/tx/${transactionData.id || transactionData.hash}`
+                      ? `/mev/ethereum/sandwich/tx/${searchTerm}`
+                      : `/mev/ethereum/tx/${searchTerm}`
               }
                 className="hover:bg-mainActiveV1/10 cursor-pointer border-b border-mainBorderV1"
                 onClick={() => {
@@ -259,7 +252,7 @@ export default function DashboardHeader() {
               >
                 <div className="flex justify-between items-center">
                   <div className="text-mainActiveV1 font-medium truncate max-w-[250px]">
-                    {transactionData.hash}
+                    {transactionData.hash || transactionData.id}
                   </div>
                   <div className="text-xs text-mainGrayV1">
                     {formatDate(transactionData.timestamp || transactionData.time || '')}

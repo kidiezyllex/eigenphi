@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useGetMevTransactionByHash } from '@/hooks/useMev'
 import LoadingState from './LoadingState'
 import TransactionSummary from './TransactionSummary'
@@ -9,7 +9,7 @@ import BlockTransactionsTable from './BlockTransactionsTable'
 import { getTransactionType } from './utils'
 import { MevType } from './types'
 import Icon from '@mdi/react'
-import { mdiMagnify, mdiEthereum, mdiConsole, mdiCog, mdiViewGrid, mdiClose, mdiCloseCircle } from '@mdi/js'
+import { mdiMagnify, mdiEthereum, mdiConsole, mdiCog, mdiViewGrid, mdiCloseCircle } from '@mdi/js'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,16 +21,12 @@ import TransactionDiagram from './TransactionDiagram'
 
 export const EthereumTxPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const params = useParams<{ hash: string }>()
-  const hash = params.hash || ""
+  const hash = usePathname().split('/')[5] || usePathname().split('/')[4]
   const router = useRouter()
   const searchParams = useSearchParams()
   const activeTab = searchParams.get('tab') || 'token-flow'
   
-  // Fetch transaction data
-  const { data: apiResponse } = useGetMevTransactionByHash(hash)
-  
-  // Fetch block data when blocknumber is available and block tab is active
+  const { data: apiResponse, isLoading: isLoadingTransaction } = useGetMevTransactionByHash(hash)
   const shouldFetchBlock = Boolean(apiResponse?.blockNumber) && activeTab === 'block'
   const { data: blockData } = useQuery({
     queryKey: ['mev', 'block', apiResponse?.blockNumber],
@@ -48,82 +44,80 @@ export const EthereumTxPage: React.FC = () => {
   const transactionType = getTransactionType(apiResponse?.label)
 
   const getSummaryData = (apiResponse: any) => {
-    switch (apiResponse?.label) {
-      case MevType.Arbitrage.toUpperCase(): {
-        return {
-          mevType: apiResponse?.label,
-          time: apiResponse?.time,
-          transactionHash: apiResponse?.hash || apiResponse?.id,
-          from: apiResponse?.from,
-          contractTo: apiResponse?.to,
-          profit: apiResponse?.profit,
-          cost: apiResponse?.cost,
-          revenue: (() => {
-            if (!apiResponse?.revenue) return "0";
-            if (apiResponse?.revenue.includes(apiResponse?.profit || "") && apiResponse?.profit) {
-              return apiResponse?.profit;
-            }
-            return apiResponse?.revenue;
-          })(),
-          blockNumber: apiResponse?.blockNumber,
-          position: apiResponse?.index,
-          timestamp: apiResponse?.timestamp
-        }
-      }
-      case MevType.Sandwich.toUpperCase(): {
-        return {
-          label: MevType.Sandwich,
-          sandwichId: apiResponse?.id,
-          blockNumber: apiResponse?.blockNumber,
-          profit: apiResponse?.profit,
-          cost: apiResponse?.cost,
-          revenue: apiResponse?.revenue,
-          time: apiResponse?.time,
-        }
-      }
-      case MevType.Liquidation.toUpperCase(): {
-        return {
-          label: MevType.Liquidation,
-          transactionHash: apiResponse?.hash || apiResponse?.id,
-          blockNumber: apiResponse?.blockNumber,
-          from: apiResponse?.from,
-          contractTo: apiResponse?.to,
-          profit: apiResponse?.profit,
-          cost: apiResponse?.cost,
-          revenue: apiResponse?.revenue,
-          time: apiResponse?.time,
-          borrower: apiResponse?.borrower,
-          liquidator: apiResponse?.liquidator,
-          debtToken: apiResponse?.debtToken,
-          debtToCover: apiResponse?.debtToCover,
-          liquidatedToken: apiResponse?.liquidatedToken,
-          liquidatedAmount: apiResponse?.liquidatedAmount,
-        }
-      }
-    }
-    if (!apiResponse?.label) {
+    if (!apiResponse) {
       return {
-        label: MevType.Normal,
-        transactionHash: apiResponse?.hash || apiResponse?.id,
-        from: apiResponse?.from,
-        contractTo: apiResponse?.to,
-        blockNumber: apiResponse?.blockNumber,
-        gasPrice: apiResponse?.gasPrice,
-        gasUsed: apiResponse?.gasUsed,
-        time: apiResponse?.time,
-        timestamp: apiResponse?.timestamp
+        label: "None",
+        transactionHash: "",
+        from: "",
+        contractTo: "",
+        blockNumber: 0,
+        gasPrice: "",
+        gasUsed: "",
+        time: "",
+        timestamp: ""
       }
     }
-    return {
-      label: "None",
-      transactionHash: "",
-      from: "",
-      contractTo: "",
-      blockNumber: 0,
-      gasPrice: "",
-      gasUsed: "",
-      time: "",
-      timestamp: ""
+    
+    if (apiResponse?.label === "ARBITRAGE") {
+      return {
+        label: "ARBITRAGE",
+        hash: apiResponse.hash,
+        from: apiResponse.from,
+        to: apiResponse.to,
+        blockNumber: apiResponse.blockNumber,
+        index: apiResponse.index,
+        profit: apiResponse.profit,
+        cost: apiResponse.cost,
+        revenue: apiResponse.revenue,
+        time: apiResponse.time,
+        traces: apiResponse.traces,
+        assetMetadata: apiResponse.assetMetadata
+      };
+    } 
+    else if (apiResponse?.label === "SANDWICH") {
+      return {
+        label: "SANDWICH",
+        id: apiResponse.id,
+        blockNumber: apiResponse.blockNumber,
+        profit: apiResponse.profit,
+        cost: apiResponse.cost,
+        revenue: apiResponse.revenue,
+        time: apiResponse.time,
+        frontRun: apiResponse.frontRun,
+        victim: apiResponse.victim,
+        backRun: apiResponse.backRun,
+        assetMetadata: apiResponse.assetMetadata
+      };
+    } 
+    else if (apiResponse?.label === "LIQUIDATION") {
+      return {
+        label: "LIQUIDATION",
+        hash: apiResponse.hash,
+        from: apiResponse.from,
+        to: apiResponse.to,
+        blockNumber: apiResponse.blockNumber,
+        profit: apiResponse.profit,
+        cost: apiResponse.cost,
+        revenue: apiResponse.revenue,
+        time: apiResponse.time,
+        liquidator: apiResponse.liquidator,
+        liquidationEvent: apiResponse.liquidationEvent,
+        traces: apiResponse.traces,
+        assetMetadata: apiResponse.assetMetadata
+      };
+    } 
+    else {
+      return {
+        label: null,
+        hash: apiResponse.hash,
+        blockNumber: apiResponse.blockNumber,
+        from: apiResponse.from,
+        to: apiResponse.to,
+        gasPrice: apiResponse.gasPrice,
+        gasUsed: apiResponse.gasUsed,
+        timestamp: apiResponse.timestamp,
+        index: apiResponse.index
+      };
     }
   }
 
@@ -170,15 +164,12 @@ export const EthereumTxPage: React.FC = () => {
     if (isLoading) {
       return <LoadingState />;
     }
-    
     switch (activeTab) {
       case 'block':
         return (
           <div className="grid grid-cols-1 gap-6">
-            {apiResponse?.label !== "ARBITRAGE" && (
-              <TransactionSummary data={transactionData as any} />
-            )}
-            <BlockTransactionsTable transactions={blockData?.transactions} />
+            <TransactionSummary data={transactionData as any} />
+            <BlockTransactionsTable transactions={(blockData as any)?.transactions} />
           </div>
         );
       case 'from':
@@ -187,26 +178,45 @@ export const EthereumTxPage: React.FC = () => {
           <div className="grid grid-cols-1 gap-6">
             <TransactionSummary data={transactionData as any} />
             <div className="p-6 bg-mainBackgroundV1 border border-mainBorderV1 rounded-md text-center">
-              <p className="text-gray-400">This feature is coming soon.</p>
+              <p className="text-gray-400">Tính năng này sắp ra mắt.</p>
             </div>
           </div>
         );
       default:
         // Default token-flow tab
-        if (apiResponse?.label === "SANDWICH") {
+        if (transactionData?.label === "SANDWICH") {
           return (
             <div className="grid grid-cols-1 gap-6">
-              <TransactionDiagram transactionHash={hash} />
+              <TransactionDiagram transactionHash={(transactionData as any)?.id || hash} />
               <TransactionSummary data={transactionData as any} />
-              <h2>Front Run</h2>
-              <TracesTable traces={(apiResponse as any)?.frontRun[0]?.traces} />
-              <h2>Victim</h2>
-              <TracesTable traces={(apiResponse as any)?.victim[0]?.traces} />
-              <h2>Back Run</h2>
-              <TracesTable traces={(apiResponse as any)?.backRun[0]?.traces} />
+              <h2 className="text-lg font-semibold text-white mt-2">Giao dịch Front Run</h2>
+              <TracesTable traces={(apiResponse as any)?.frontRun?.[0]?.traces} />
+              <h2 className="text-lg font-semibold text-white mt-2">Giao dịch Victim</h2>
+              <TracesTable traces={(apiResponse as any)?.victim?.[0]?.traces} />
+              <h2 className="text-lg font-semibold text-white mt-2">Giao dịch Back Run</h2>
+              <TracesTable traces={(apiResponse as any)?.backRun?.[0]?.traces} />
+            </div>
+          );
+        } else if (transactionData?.label === "LIQUIDATION") {
+          return (
+            <div className="grid grid-cols-1 gap-6">
+              <TransactionDiagram transactionHash={(transactionData as any)?.hash || hash} />
+              <TransactionSummary data={transactionData as any} />
+              <h2 className="text-lg font-semibold text-white mt-2">Dấu vết thanh lý</h2>
+              <TracesTable traces={apiResponse?.traces} />
+            </div>
+          );
+        } else if (transactionData?.label === "ARBITRAGE") {
+          return (
+            <div className="grid grid-cols-1 gap-6">
+              <TransactionDiagram transactionHash={(transactionData as any)?.hash || hash} />
+              <TransactionSummary data={transactionData as any} />
+              <h2 className="text-lg font-semibold text-white mt-2">Dấu vết arbitrage</h2>
+              <TracesTable traces={apiResponse?.traces} />
             </div>
           );
         } else {
+          // Normal transaction
           return (
             <div className="grid grid-cols-1 gap-6">
               <TransactionDiagram transactionHash={hash} />

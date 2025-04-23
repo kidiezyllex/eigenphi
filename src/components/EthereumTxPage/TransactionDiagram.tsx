@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -25,6 +25,30 @@ const TransactionDiagram: React.FC<TransactionDiagramProps> = ({ transactionHash
     }, [transactionHash, isValidHash])
 
     const [open, setOpen] = useState(false)
+    const [imageLoadError, setImageLoadError] = useState(false);
+
+    useEffect(() => {
+        if (isValidHash && diagramUrl) {
+            setImageLoadError(false); // Reset error state
+            fetch(diagramUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle non-2xx status codes, including 404
+                        console.error(`Failed to load transaction diagram: ${response.status}`);
+                        setImageLoadError(true);
+                    } else {
+                        setImageLoadError(false);
+                    }
+                })
+                .catch(error => {
+                    // Handle network errors
+                    console.error('Network error fetching transaction diagram:', error);
+                    setImageLoadError(true);
+                });
+        } else {
+            setImageLoadError(false); // No valid hash or URL, no image error
+        }
+    }, [diagramUrl, isValidHash]);
 
     return (
         <Card className="bg-mainBackgroundV1 border border-mainBorderV1">
@@ -57,7 +81,7 @@ const TransactionDiagram: React.FC<TransactionDiagramProps> = ({ transactionHash
             </CardHeader>
 
             <CardContent className="p-4 flex justify-center items-center overflow-hidden">
-                {isValidHash ? (
+                {isValidHash && !imageLoadError ? (
                     <div className="w-full max-h-[500px] overflow-auto" style={{ backgroundColor: '#141517' }}>
                         <img
                             src={diagramUrl}
@@ -80,7 +104,7 @@ const TransactionDiagram: React.FC<TransactionDiagramProps> = ({ transactionHash
                 ) : (
                     <div className="flex flex-col items-center justify-center py-2">
                         <Icon path={mdiChartLine} size={1} className="text-mainGrayV1 mb-2" />
-                        <p className="text-mainGrayV1 text-center">No transaction data available!</p>
+                        <p className="text-mainGrayV1 text-center">Transaction Diagram does not exist!</p>
                     </div>
                 )}
             </CardContent>

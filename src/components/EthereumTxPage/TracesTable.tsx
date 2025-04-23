@@ -11,6 +11,7 @@ import CopyButton from './CopyButton'
 import { Trace } from './types'
 import { formatValue, isNullAddress } from './utils'
 import { Pagination } from '@/components/ui/pagination'
+import { message } from 'antd'
 
 interface TracesTableProps {
   traces: Trace[] | undefined
@@ -21,7 +22,17 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
   const [sortedTraces, setSortedTraces] = useState<Trace[] | undefined>(traces)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const pageSize = 20 // 20 items per page
-
+  const [copiedEventLogIndex, setCopiedEventLogIndex] = useState<number | null>(null);
+  const handleCopy = async (text: string, eventLogIndex: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedEventLogIndex(eventLogIndex);
+      message.success(`Đã sao chép ${text} vào clipboard!`);
+      setTimeout(() => setCopiedEventLogIndex(null), 2000);
+    } catch (err) {
+      message.error('Sao chép thất bại.');
+    }
+  };
   useEffect(() => {
     setSortedTraces(traces)
   }, [traces])
@@ -111,21 +122,20 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
           <table className="w-full border-collapse min-w-full table-fixed">
             <thead className="bg-mainCardV1">
               <tr>
-                <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium">
+                <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium w-[40%]">
                   <div className="flex items-center space-x-1">
                     <Icon path={mdiEthereum} size={0.7} />
                     <span>Hash</span>
-                    <Icon path={mdiOpenInNew} size={0.7} />
                   </div>
                 </th>
-                <th className="py-2 px-4 text-right text-gray-400 text-xs font-medium">
+                <th className="py-2 px-4 text-right text-gray-400 text-xs font-medium w-[15%]">
                   <div className="flex items-center justify-end space-x-1">
                     <Icon path={mdiEthereum} size={0.7} />
                     <span>Amount</span>
                   </div>
                 </th>
-                <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium">Asset</th>
-                <th className="py-2 px-4 text-right text-gray-400 text-xs font-medium">
+                <th className="py-2 px-4 text-left text-gray-400 text-xs font-medium w-[30%]">Asset</th>
+                <th className="py-2 px-4 text-right text-gray-400 text-xs font-medium w-[15%]">
                   <button
                     className="flex items-center justify-end space-x-1 w-full cursor-pointer"
                     onClick={handleSort}
@@ -141,15 +151,10 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                 <React.Fragment key={index}>
                   <tr className="border-b border-mainBorderV1 hover:bg-mainCardV1/50">
                     <td className="py-3 px-4">
-                      
                         <div className="flex items-center space-x-2">
                           <Blockie address={trace.from} size={18} />
                           <AddressLink address={trace.from} shorten={false} />
-                          <CopyButton
-                            text={trace.from}
-                            copied={false}
-                            onCopy={(text) => navigator.clipboard.writeText(text)}
-                          />
+                          <CopyButton text={trace.from} onCopy={() => handleCopy(trace.from, trace.eventLogIndex)} copied={copiedEventLogIndex === trace.eventLogIndex} />
                           <a
                             href={`/mev/ethereum/address/${trace.from}`}
                             target="_blank"
@@ -167,12 +172,8 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Blockie address={trace.asset} size={18} />
-                        <AddressLink address={trace.asset} isAsset={true} shorten={false} />
-                        <CopyButton
-                          text={trace.asset}
-                          copied={false}
-                          onCopy={(text) => navigator.clipboard.writeText(text)}
-                        />
+                        {/* <AddressLink address={trace.asset} isAsset={true} shorten={false} /> */}
+                        <CopyButton text={trace.asset} onCopy={() => handleCopy(trace.asset, trace.eventLogIndex)} copied={copiedEventLogIndex === trace.eventLogIndex} />
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -185,11 +186,7 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                         <div className="flex items-center space-x-2">
                           <Blockie address={trace.to} size={18} />
                           <AddressLink address={trace.to} shorten={false} />
-                          <CopyButton
-                            text={trace.to}
-                            copied={false}
-                            onCopy={(text) => navigator.clipboard.writeText(text)}
-                          />
+                          <CopyButton text={trace.to} onCopy={() => handleCopy(trace.to, trace.eventLogIndex)} copied={copiedEventLogIndex === trace.eventLogIndex} />
                           <a
                             href={`/mev/ethereum/address/${trace.to}`}
                             target="_blank"
@@ -206,12 +203,8 @@ const TracesTable: React.FC<TracesTableProps> = ({ traces }) => {
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-2">
                         <Blockie address={trace.asset} size={18} />
-                        <AddressLink address={trace.asset} isAsset={true} shorten={false} />
-                        <CopyButton
-                          text={trace.asset}
-                          copied={false}
-                          onCopy={(text) => navigator.clipboard.writeText(text)}
-                        />
+                        {/* <AddressLink address={trace.asset} isAsset={true} shorten={false} /> */}
+                        <CopyButton text={trace.asset} onCopy={() => handleCopy(trace.asset, trace.eventLogIndex)} copied={copiedEventLogIndex === trace.eventLogIndex} />
                       </div>
                     </td>
                     <td className="py-3 px-4 text-right">

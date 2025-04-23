@@ -24,7 +24,9 @@ export function getTransactionType(label: string | null | undefined): string {
       return "Sandwich"
     case "LIQUIDATION":
       return "Liquidation"
+    case "NONE":
+      return "Transaction"
     default:
-      return "None"
+      return label || "Transaction"
   }
 } 

@@ -11,20 +11,89 @@ interface TransactionSummaryProps {
 }
 
 const TransactionSummary: React.FC<TransactionSummaryProps> = ({ data }) => {
-  const isMevTransaction = data.mevType && data.mevType !== MevType.Normal;
-  const summaryEntries = Object.entries(data).filter(([key, value]) => {
-    if (key === "timestamp" && data.time) return false; 
-    if ((key === "profit" || key === "cost" || key === "revenue") && !isMevTransaction) {
-      return false;
-    }
+  let summaryEntries: [string, any][] = [];
+  
+  if ((data as any).label === "SANDWICH") {
+    summaryEntries.push(["Transaction Type", "SANDWICH"]);
+    const excludedFields = ["label", "id", "blockNumber", "profit", "cost", "revenue", "time", "frontRun", "victim", "backRun", "assetMetadata", "mevType"];
+    if ((data as any).profit !== undefined) summaryEntries.push(["Lợi nhuận", (data as any).profit + " ETH"]);
+    if ((data as any).cost !== undefined) summaryEntries.push(["Chi phí", (data as any).cost + " ETH"]);
+    if ((data as any).revenue !== undefined) summaryEntries.push(["Doanh thu", (data as any).revenue + " ETH"]);
+    if ((data as any).blockNumber !== undefined) summaryEntries.push(["Số khối", (data as any).blockNumber]);
+    Object.entries(data).forEach(([key, value]) => {
+      if (!excludedFields.includes(key) && key !== "sandwichId" && value !== undefined) {
+        summaryEntries.push([key, value]);
+      }
+    });
+  } else if ((data as any).label === "ARBITRAGE") {
+    summaryEntries.push(["Transaction Type", "ARBITRAGE"]);
     
-    return true;
-  });
+    if ((data as any).hash) summaryEntries.push(["Hash", (data as any).hash]);
+    if ((data as any).from) summaryEntries.push(["Sender", (data as any).from]);
+    if ((data as any).to) summaryEntries.push(["Recipient", (data as any).to]);
+    if ((data as any).blockNumber) summaryEntries.push(["Block Number", (data as any).blockNumber]);
+    if ((data as any).index !== undefined) summaryEntries.push(["Index", (data as any).index]);
+    
+    if ((data as any).profit !== undefined) summaryEntries.push(["Profit", (data as any).profit + " ETH"]);
+    if ((data as any).cost !== undefined) summaryEntries.push(["Cost", (data as any).cost + " ETH"]);
+    if ((data as any).revenue !== undefined) summaryEntries.push(["Revenue", (data as any).revenue + " ETH"]);
+    if ((data as any).time) summaryEntries.push(["Time", (data as any).time]);
+  } else if ((data as any).label === "LIQUIDATION") {
+    summaryEntries.push(["Transaction Type", "LIQUIDATION"]);
+    
+    if ((data as any).hash) summaryEntries.push(["Hash", (data as any).hash]);
+    if ((data as any).from) summaryEntries.push(["Sender", (data as any).from]);
+    if ((data as any).to) summaryEntries.push(["Recipient", (data as any).to]);
+    if ((data as any).blockNumber) summaryEntries.push(["Block Number", (data as any).blockNumber]);
+    if ((data as any).time) summaryEntries.push(["Time", (data as any).time]);
+    
+    if ((data as any).profit !== undefined) summaryEntries.push(["Profit", (data as any).profit.toString() + " ETH"]);
+    if ((data as any).cost !== undefined) summaryEntries.push(["Cost", (data as any).cost.toString() + " ETH"]);
+    if ((data as any).revenue !== undefined) summaryEntries.push(["Revenue", (data as any).revenue.toString() + " ETH"]);
+    
+    if ((data as any).liquidator) summaryEntries.push(["Liquidator", (data as any).liquidator]);
+    
+    if ((data as any).liquidationEvent && (data as any).liquidationEvent.length > 0) {
+      const event = (data as any).liquidationEvent[0];
+      if (event.borrower) summaryEntries.push(["Borrower", event.borrower]);
+      if (event.liquidatedToken) summaryEntries.push(["Liquidated Token", event.liquidatedToken]);
+      if (event.liquidatedAmount) summaryEntries.push(["Liquidated Amount", event.liquidatedAmount.toString()]);
+      if (event.debtToken) summaryEntries.push(["Debt Token", event.debtToken]);
+      if (event.debtToCover) summaryEntries.push(["Debt to Cover", event.debtToCover.toString()]);
+    }
+  } else {
+    summaryEntries.push(["Transaction Type", "NORMAL"]);
+    
+    Object.entries(data).forEach(([key, value]) => {
+      if (key !== "label" && key !== "timestamp" && value !== undefined && key !== "mevType") {
+        if (key === "time" && (data as any).timestamp) return;
+        
+        if (key === "hash") {
+          summaryEntries.push(["Hash", value]);
+        } else if (key === "from") {
+          summaryEntries.push(["Sender", value]);
+        } else if (key === "to") {
+          summaryEntries.push(["Recipient", value]);
+        } else if (key === "blockNumber") {
+          summaryEntries.push(["Block Number", value]);
+        } else if (key === "gasPrice" && value) {
+          summaryEntries.push(["Gas Price", value + " Gwei"]);
+        } else if (key === "gasUsed") {
+          summaryEntries.push(["Gas Used", value]);
+        } else if (key === "timestamp") {
+          summaryEntries.push(["Time", value]);
+        } else if (key === "index") {
+          summaryEntries.push(["Index", value]);
+        } else {
+          summaryEntries.push([key, value]);
+        }
+      }
+    });
+  }
 
-  // Calculate relative time from timestamp
   const getTimeAgo = () => {
-    const timestamp = data.timestamp || data.time;
-    if (!timestamp) return "Unknown time";
+    const timestamp = (data as any).timestamp || (data as any).time;
+    if (!timestamp) return "Time not determined";
     
     const txTime = new Date(timestamp);
     const now = new Date();
@@ -56,7 +125,7 @@ const TransactionSummary: React.FC<TransactionSummaryProps> = ({ data }) => {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="w-[200px] text-xs">Transaction overview details</p>
+                <p className="w-[200px] text-xs">Detailed overview of the transaction</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -75,10 +144,11 @@ const TransactionSummary: React.FC<TransactionSummaryProps> = ({ data }) => {
           <tbody>
             {summaryEntries.map(([key, value], index) => (
               <SummaryRow 
-                key={key} 
+                key={`${key}-${index}`}
                 label={key} 
                 value={value} 
-                isLast={index === summaryEntries.length - 1} 
+                isLast={index === summaryEntries.length - 1}
+                sandwichData={(data as any).label === "SANDWICH" ? (data as any) : undefined} 
               />
             ))}
           </tbody>
