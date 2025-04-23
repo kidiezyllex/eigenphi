@@ -42,9 +42,7 @@ export default function DashboardHeader() {
   const { account, setAccount } = useAddress();
   const [isConnecting, setIsConnecting] = useState(false);
   const [showMetaMaskModal, setShowMetaMaskModal] = useState(false);
-  // const { data } = useGetMevByAddress(account || '0x1f2f10d1c40777ae1da742455c65828ff36df387');
   const { data } = useGetMevByAddress('0x1f2f10d1c40777ae1da742455c65828ff36df387');
-  console.log(data);
   const isUsingTransaction = searchTerm.length === 66;
   
   const { data: transactionData, isLoading: isTransactionLoading } = useGetMevTransactionByHash(
@@ -54,6 +52,9 @@ export default function DashboardHeader() {
   const { data: blocksData, isLoading: isBlocksLoading } = useGetMevBlockByNumber(
     !isUsingTransaction && searchTerm ? Number(searchTerm) : 0
   );
+  
+  const [showDisconnectDropdown, setShowDisconnectDropdown] = useState(false);
+  const disconnectDropdownRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     if (blocksData) {
@@ -162,7 +163,6 @@ export default function DashboardHeader() {
 
     checkIfMetaMaskIsConnected();
 
-    // Cleanup listener khi component unmount
     return () => {
       if (window.ethereum) {
         window.ethereum.removeAllListeners('accountsChanged');
@@ -222,7 +222,13 @@ export default function DashboardHeader() {
   };
 
   const disconnectWallet = () => {
-    setAccount('');
+    setShowDisconnectDropdown(true);
+  };
+
+  const confirmDisconnect = () => {
+    setAccount(null);
+    setShowDisconnectDropdown(false);
+    router.push('/');
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,6 +259,22 @@ export default function DashboardHeader() {
         return "bg-blue-500/20 text-blue-400";
     }
   };
+
+  // Thêm useEffect để xử lý click outside cho dropdown disconnect
+  useEffect(() => {
+    const handleClickOutsideDropdown = (event: MouseEvent) => {
+      if (
+        disconnectDropdownRef.current &&
+        !disconnectDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDisconnectDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutsideDropdown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideDropdown);
+    };
+  }, []);
 
   return (
     <>
@@ -294,13 +316,35 @@ export default function DashboardHeader() {
                 onFocus={() => searchTerm.length > 0 && setIsResultVisible(true)}
               />
               {account ? (
-                <button
-                  onClick={disconnectWallet}
-                  type="button"
-                  className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors hover:bg-mainActiveV1/10">
-                  <Icon path={mdiEthereum} size={0.7} className="text-mainActiveV1" />
-                  <span className="text-sm text-mainActiveV1">{`${account.slice(0, 6)}...${account.slice(-4)}`}</span>
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={disconnectWallet}
+                    type="button"
+                    className="flex items-center space-x-1 px-3 py-2 rounded-sm bg-mainCardV1 transition-colors hover:bg-mainActiveV1/10">
+                    <Icon path={mdiEthereum} size={0.7} className="text-mainActiveV1" />
+                    <span className="text-sm text-mainActiveV1">{`${account.slice(0, 6)}...${account.slice(-4)}`}</span>
+                  </button>
+                  
+                  {showDisconnectDropdown && (
+                    <div 
+                      ref={disconnectDropdownRef}
+                      className="absolute right-0 mt-1 w-36 bg-mainCardV1 border border-mainBorderV1 rounded-md shadow-lg z-50"
+                    >
+                      <button 
+                        onClick={confirmDisconnect}
+                        className="w-full font-semibold text-left px-4 py-2 text-sm text-red-400 hover:bg-mainActiveV1/10 rounded-t-md"
+                      >
+                        Confirm
+                      </button>
+                      <button 
+                        onClick={() => setShowDisconnectDropdown(false)}
+                        className="w-full font-semibold text-left px-4 py-2 text-sm text-mainGrayV1 hover:bg-mainActiveV1/10 rounded-b-md"
+                      >
+                        Exit
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <button
                   onClick={connectWallet}

@@ -9,7 +9,8 @@ import { Icon } from '@mdi/react';
 import { MenuItem } from '@/interface/types';
 import DashboardHeader from '../Common/DashboardHeader';
 import { useMenuSidebar } from '@/stores/useMenuSidebar';
-import { dashboardMenuItems } from './dashboardMenuItems';
+import { getDashboardMenuItems } from './dashboardMenuItems';
+import { useAddress } from '@/stores/useAddress';
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,8 @@ export default function DashboardLayout({
   const [hoverMenu, setHoverMenu] = useState<string | null>(null);
   const pathname = usePathname();
   const { isOpen } = useMenuSidebar();
+  const { account } = useAddress();
+  const dashboardMenuItems = getDashboardMenuItems(account);
 
   const isMenuActive = (menu: MenuItem) => {
     if (menu.path && pathname === menu.path) return true;
